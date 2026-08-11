@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in — Nexus Forge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+      <div class="container nav-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-mark"></span> Nexus Forge
+        </a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html" class="active">Home</a>
+          <a href="browse.html" class="">Browse Gigs</a>
+        </div>
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+                 <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>
+        </div>
+      </div>
+    </nav>
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="card">
+      <div class="text-center mb-24">
+        <div class="logo" style="justify-content:center;"><span class="logo-mark">Nexus Forge</span></div>
+        <h2 class="mt-16">Welcome back</h2>
+        <p class="muted mt-8" style="font-size:0.9rem;">Log in to your Nexus Forge account</p>
+      </div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-control" id="email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-control" id="password" type="password" placeholder="••••••••" required>
+        </div>
+
+        <div id="loginError"></div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="loginBtn">Log in</button>
+      </form>
+
+      <p class="text-center mt-24 muted" style="font-size:0.88rem;">
+        Don't have an account? <a href="signup.html" style="color:var(--orange-400); font-weight:600;">Sign up</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+renderNav();
+
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("loginBtn");
+  const errorBox = document.getElementById("loginError");
+  errorBox.innerHTML = "";
+
+  const payload = {
+    email: document.getElementById("email").value.trim(),
+    password: document.getElementById("password").value,
+  };
+
+  btn.disabled = true;
+  btn.textContent = "Logging in...";
+
+  try {
+    const data = await Api.login(payload);
+    Auth.setToken(data.token);
+    Auth.setUser(data.user);
+    showToast(`Welcome back, ${data.user.name.split(" ")[0]}!`);
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    errorBox.innerHTML = `<p style="color:var(--danger); font-size:0.85rem; margin-bottom:12px;">${escapeHtml(err.message)}</p>`;
+    btn.disabled = false;
+    btn.textContent = "Log in";
+  }
+});
+</script>
+</body>
+</html>

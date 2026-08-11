@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Gigs — Nexus Forge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+      <div class="container nav-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-mark"></span> Nexus Forge
+        </a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html" class="active">Home</a>
+          <a href="browse.html" class="">Browse Gigs</a>
+        </div>
+        <div class="nav-actions">
+          <span class="muted" style="font-size:0.85rem;">Hi, </span>
+          <a href="login.html"><button class="btn btn-ghost btn-sm" id="navLogout">Log out</button></a>
+        </div>
+      </div>
+    </nav>
+
+
+<section class="section-sm">
+  <div class="container">
+    <h2 class="mb-8">Browse open gigs</h2>
+    <p class="muted mb-24">Find your next project</p>
+
+    <div class="filters-bar">
+      <input class="form-control" id="searchInput" type="text" placeholder="Search gigs...">
+      <select class="form-control" id="categorySelect">
+        <option value="all">All categories</option>
+        <option value="Design">Design</option>
+        <option value="Writing">Writing</option>
+        <option value="Development">Development</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Video & Audio">Video & Audio</option>
+        <option value="Data">Data</option>
+        <option value="General">General</option>
+      </select>
+      <div class="checkbox-row" style="background:#aef8c1; padding:10px 16px; border-radius:8px; border:1px solid var(--charcoal-600);">
+        <input type="checkbox" id="beginnerOnly">
+        <label for="beginnerOnly" style="font-size:0.9rem;">Beginner friendly only</label>
+      </div>
+    </div>
+    <div id="gigsList" class="grid grid-3"></div>
+  </div>
+</section>
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo mb-16"><span class="logo-mark"></span> Nexus Forge</div>
+        <p class="muted" style="font-size:0.88rem; max-width:280px;">The beginner-first freelance marketplace, built in Nigeria-first with global ambitions.</p>
+      </div>
+      <div>
+        <h4>Platform</h4>
+        <ul><li><a href="browse.html">Browse Gigs</a></li><li><a href="signup.html">Sign up</a></li><li><a href="login.html">Log in</a></li></ul>
+      </div>
+      <div>
+        <h4>For Freelancers</h4>
+        <ul><li><a href="#features">Beginner Boost</a></li><li><a href="#features">Skill Quizzes</a></li><li><a href="#features">Nexus Score</a></li></ul>
+      </div>
+      <div>
+        <h4>For Clients</h4>
+        <ul><li><a href="post-gig.html">Post a Gig</a></li><li><a href="#features">Dispute Shield</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Nexus Forge. All rights reserved.</span>
+      <span>Made for beginners, everywhere.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+renderNav('browse');
+
+const gigsList = document.getElementById("gigsList");
+const searchInput = document.getElementById("searchInput");
+const categorySelect = document.getElementById("categorySelect");
+const beginnerOnly = document.getElementById("beginnerOnly");
+
+function gigCardHtml(gig) {
+  const budgetLabel = gig.budget_type === "hourly" ? `₦${gig.budget}/hr` : `₦${gig.budget.toLocaleString()}`;
+  return `
+    <a href="gig-detail.html?id=${gig.id}" class="card gig-card">
+      <div class="gig-top">
+        <h3>${escapeHtml(gig.title)}</h3>
+        <span class="budget">${budgetLabel}</span>
+      </div>
+      <p class="gig-desc">${escapeHtml(gig.description)}</p>
+      <div class="gig-meta">
+        <span class="badge badge-grey">${escapeHtml(gig.category)}</span>
+        ${gig.beginner_friendly ? `<span class="badge badge-orange">Beginner Friendly</span>` : ""}
+      </div>
+      <div class="flex-between mt-8" style="font-size:0.8rem;" class="muted">
+        <span class="muted">by ${escapeHtml(gig.client_name)}</span>
+        <span class="muted">${timeAgo(gig.created_at)}</span>
+      </div>
+    </a>
+  `;
+}
+
+async function loadGigs() {
+  gigsList.innerHTML = `<div class="page-loading" style="grid-column:1/-1;"><div class="spinner"></div></div>`;
+  try {
+    const params = {};
+    if (searchInput.value.trim()) params.q = searchInput.value.trim();
+    if (categorySelect.value !== "all") params.category = categorySelect.value;
+    if (beginnerOnly.checked) params.beginner_friendly = "true";
+
+    const data = await Api.listGigs(params);
+    if (data.gigs.length === 0) {
+      gigsList.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1;">
+          <div class="icon">🔍</div>
+          <h3>No gigs found</h3>
+          <p class="mt-8">Try adjusting your filters, or check back soon.</p>
+        </div>`;
+      return;
+    }
+    gigsList.innerHTML = data.gigs.map(gigCardHtml).join("");
+  } catch (err) {
+    gigsList.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">⚠️</div><p>${escapeHtml(err.message)}</p></div>`;
+  }
+}
+
+let debounceTimer;
+searchInput.addEventListener("input", () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(loadGigs, 350);
+});
+categorySelect.addEventListener("change", loadGigs);
+beginnerOnly.addEventListener("change", loadGigs);
+
+loadGigs();
+</script>
+</body>
+</html>

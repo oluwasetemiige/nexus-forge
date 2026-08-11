@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gig Details — Nexus Forge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+      <div class="container nav-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-mark"></span> Nexus Forge
+        </a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html" class="active">Home</a>
+          <a href="browse.html" class="">Browse Gigs</a>
+        </div>
+        <div class="nav-actions">
+          <span class="muted" style="font-size:0.85rem;">Hi, room</span>
+          <a href="login.html"><button class="btn btn-ghost btn-sm" id="navLogout">Log out</button></a>
+        </div>
+      </div>
+    </nav>
+
+<section class="section-sm">
+  <div class="container" style="max-width:800px;">
+    <a href="browse.html" class="muted" style="font-size:0.88rem;">← Back to gigs</a>
+    <div id="gigContent" class="mt-24"><div class="card"></div> </div> </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo mb-16"><span class="logo-mark"></span> Nexus Forge</div>
+        <p class="muted" style="font-size:0.88rem; max-width:280px;">The beginner-first freelance marketplace, built in Nigeria-first with global ambitions.</p>
+      </div>
+      <div>
+        <h4>Platform</h4>
+        <ul><li><a href="browse.html">Browse Gigs</a></li><li><a href="signup.html">Sign up</a></li><li><a href="login.html">Log in</a></li></ul>
+      </div>
+      <div>
+        <h4>For Freelancers</h4>
+        <ul><li><a href="#features">Beginner Boost</a></li><li><a href="#features">Skill Quizzes</a></li><li><a href="#features">Nexus Score</a></li></ul>
+      </div>
+      <div>
+        <h4>For Clients</h4>
+        <ul><li><a href="post-gig.html">Post a Gig</a></li><li><a href="#features">Dispute Shield</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Nexus Forge. All rights reserved.</span>
+      <span>Made for beginners, everywhere.</span>
+    </div>
+  </div>
+</footer>
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+renderNav('browse');
+
+const params = new URLSearchParams(window.location.search);
+const gigId = params.get("id");
+const content = document.getElementById("gigContent");
+const currentUser = Auth.getUser();
+
+function applicationRow(app) {
+  const statusBadge = {
+    pending: `<span class="badge badge-yellow">Pending</span>`,
+    accepted: `<span class="badge badge-green">Accepted</span>`,
+    rejected: `<span class="badge badge-red">Rejected</span>`,
+  }[app.status];
+
+  return `
+    <div class="app-row">
+      <div>
+        <strong>${escapeHtml(app.freelancer_name)}</strong> — ₦${app.price.toLocaleString()}
+        <p class="muted mt-8" style="font-size:0.88rem;">${escapeHtml(app.proposal)}</p>
+      </div>
+      <div class="flex gap-8" style="align-items:center;">
+        ${statusBadge}
+        ${
+          app.status === "pending"
+            ? `<button class="btn btn-sm btn-primary" onclick="respondToApp(${app.id}, 'accepted')">Accept</button>
+               <button class="btn btn-sm btn-danger" onclick="respondToApp(${app.id}, 'rejected')">Decline</button>`
+            : ""
+        }
+      </div>
+    </div>
+  `;
+}
+
+async function respondToApp(appId, status) {
+  try {
+    await Api.updateApplicationStatus(appId, status);
+    showToast(`Application ${status}`);
+    loadGig();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+}
+
+async function loadGig() {
+  if (!gigId) {
+    content.innerHTML = `<div class="empty-state"><p>No gig specified.</p></div>`;
+    return;
+  }
+  try {
+    const { gig } = await Api.getGig(gigId);
+    const budgetLabel = gig.budget_type === "hourly" ? `₦${gig.budget}/hr` : `₦${gig.budget.toLocaleString()}`;
+    const isOwner = currentUser && currentUser.id === gig.client_id;
+    const alreadyApplied = currentUser && gig.applications.some((a) => a.freelancer_id === currentUser.id);
+
+    content.innerHTML = `
+      <div class="card">
+        <div class="gig-top">
+          <div>
+            <h1 style="font-size:1.6rem;">${escapeHtml(gig.title)}</h1>
+            <p class="muted mt-8">Posted by ${escapeHtml(gig.client_name)} · ${timeAgo(gig.created_at)}</p>
+          </div>
+          <span class="budget" style="font-size:1.4rem;">${budgetLabel}</span>
+        </div>
+        <div class="flex gap-8 mt-16" style="flex-wrap:wrap;">
+          <span class="badge badge-grey">${escapeHtml(gig.category)}</span>
+          ${gig.beginner_friendly ? `<span class="badge badge-orange">Beginner Friendly</span>` : ""}
+          <span class="badge ${gig.status === 'open' ? 'badge-green' : 'badge-grey'}">${gig.status.replace('_',' ')}</span>
+        </div>
+        <div class="divider"></div>
+        <p style="white-space:pre-wrap;">${escapeHtml(gig.description)}</p>
+        ${gig.deadline ? `<p class="muted mt-16" style="font-size:0.88rem;"> Deadline: ${escapeHtml(gig.deadline)}</p>` : ""}
+      </div>
+
+      <div id="applySection" class="card mt-24"></div>
+
+      ${
+        isOwner
+          ? `<div class="card mt-24">
+               <h3 class="mb-16">Applications (${gig.applications.length})</h3>
+               ${gig.applications.length ? gig.applications.map(applicationRow).join("") : `<p class="muted">No applications yet.</p>`}
+             </div>`
+          : ""
+      }
+    `;
+
+    const applySection = document.getElementById("applySection");
+    if (isOwner) {
+      applySection.style.display = "none";
+    } else if (!currentUser) {
+      applySection.innerHTML = `<p class="text-center muted">Log in as a freelancer to apply for this gig.</p>
+        <a href="login.html" class="btn btn-primary btn-block mt-16">Log in to apply</a>`;
+    } else if (currentUser.role !== "freelancer") {
+      applySection.innerHTML = `<p class="text-center muted">Only Clients accounts can apply to gigs.</p>`;
+    } else if (alreadyApplied) {
+      applySection.innerHTML = `<p class="text-center"><span class="badge badge-green">✓ You've applied to this gig</span></p>`;
+    } else if (gig.status !== "open") {
+      applySection.innerHTML = `<p class="text-center muted">This gig is no longer accepting applications.</p>`;
+    } else {
+      applySection.innerHTML = `
+        <h3 class="mb-16">Apply for this gig</h3>
+        <form id="applyForm">
+          <div class="form-group">
+            <label class="form-label">Your proposal</label>
+            <textarea class="form-control" id="proposal" placeholder="Explain why you're a great fit..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your price (₦)</label>
+            <input class="form-control" id="price" type="number" min="0" step="1" placeholder="25000" required>
+          </div>
+          <div id="applyError"></div>
+          <button type="submit" class="btn btn-primary btn-block" id="applyBtn">Submit application</button>
+        </form>
+      `;
+      document.getElementById("applyForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("applyBtn");
+        const errBox = document.getElementById("applyError");
+        btn.disabled = true;
+        btn.textContent = "Submitting...";
+        try {
+          await Api.applyToGig(gigId, {
+            proposal: document.getElementById("proposal").value.trim(),
+            price: document.getElementById("price").value,
+          });
+          showToast("Application submitted!");
+          loadGig();
+        } catch (err) {
+          errBox.innerHTML = `<p style="color:var(--danger); font-size:0.85rem; margin-bottom:12px;">${escapeHtml(err.message)}</p>`;
+          btn.disabled = false;
+          btn.textContent = "Submit application";
+        }
+      });
+    }
+  } catch (err) {
+    content.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${escapeHtml(err.message)}</p></div>`;
+  }
+}
+
+loadGig();
+</script>
+</body>
+</html>

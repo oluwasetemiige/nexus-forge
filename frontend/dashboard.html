@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Nexus Forge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="nav-root">
+    <nav class="navbar">
+      <div class="container nav-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-mark">⚡</span> Nexus Forge
+        </a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html" class="">Home</a>
+          <a href="browse.html" class="">Browse Gigs</a>
+          <a href="dashboard.html" class="active">Dashboard</a>
+          <a href="profile.html" class="">Profile</a>
+        </div>
+        <div class="nav-actions">
+          <span class="muted" style="font-size:0.85rem;">Hi, room</span>
+                 <button class="btn btn-ghost btn-sm" id="navLogout">Log out</button>
+        </div>
+      </div>
+    </nav>
+  </div>
+<section class="section-sm">
+  <div class="container">
+    <div id="dashboardContent">
+      <div class="page-loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+renderNav('dashboard');
+if (!requireLogin()) { /* redirected */ }
+
+const content = document.getElementById("dashboardContent");
+const user = Auth.getUser();
+
+function statusBadge(status) {
+  const map = {
+    pending: `<span class="badge badge-yellow">Pending</span>`,
+    accepted: `<span class="badge badge-green">Accepted</span>`,
+    rejected: `<span class="badge badge-red">Rejected</span>`,
+    open: `<span class="badge badge-green">Open</span>`,
+    in_progress: `<span class="badge badge-orange">In progress</span>`,
+    completed: `<span class="badge badge-grey">Completed</span>`,
+    cancelled: `<span class="badge badge-red">Cancelled</span>`,
+  };
+  return map[status] || `<span class="badge badge-grey">${status}</span>`;
+}
+
+async function loadClientDashboard(data) {
+  content.innerHTML = `
+    <div class="flex-between mb-24" style="flex-wrap:wrap; gap:16px;">
+      <div>
+        <h2>Welcome back, ${escapeHtml(user.name.split(" ")[0])} 👋</h2>
+        <p class="muted mt-8">Here's what's happening with your gigs.</p>
+      </div>
+      <a href="post-gig.html" class="btn btn-primary">+ Post a Gig</a>
+    </div>
+
+    <div class="grid grid-3 mb-32">
+      <div class="card stat-card"><div class="num">${data.stats.total_gigs}</div><div class="label">Total Gigs Posted</div></div>
+      <div class="card stat-card"><div class="num">${data.stats.open_gigs}</div><div class="label">Currently Open</div></div>
+      <div class="card stat-card"><div class="num">${data.stats.total_applications}</div><div class="label">Total Applications</div></div>
+    </div>
+
+    <h3 class="mb-16">Your gigs</h3>
+    <div class="card">
+      ${
+        data.gigs.length
+          ? data.gigs.map((g) => `
+            <div class="app-row">
+              <div>
+                <a href="gig-detail.html?id=${g.id}" style="font-weight:700;">${escapeHtml(g.title)}</a>
+                <p class="muted mt-8" style="font-size:0.85rem;">₦${g.budget.toLocaleString()} · ${escapeHtml(g.category)} · ${timeAgo(g.created_at)}</p>
+              </div>
+              ${statusBadge(g.status)}
+            </div>
+          `).join("")
+          : `<div class="empty-state"><div class="icon">📋</div><p>You haven't posted any gigs yet.</p><a href="post-gig.html" class="btn btn-primary mt-16">Post your first gig</a></div>`
+      }
+    </div>
+  `;
+}
+
+async function loadFreelancerDashboard(data) {
+  content.innerHTML = `
+    <div class="mb-24">
+      <h2>Welcome back, ${escapeHtml(user.name.split(" ")[0])} 👋</h2>
+      <p class="muted mt-8">Track your applications and grow your Nexus Score.</p>
+    </div>
+
+    <div class="grid grid-4 mb-32">
+      <div class="card stat-card"><div class="num">${data.stats.total_applications}</div><div class="label">Applications Sent</div></div>
+      <div class="card stat-card"><div class="num">${data.stats.accepted}</div><div class="label">Accepted</div></div>
+      <div class="card stat-card"><div class="num">${data.stats.pending}</div><div class="label">Pending</div></div>
+      <div class="card stat-card"><div class="num">${data.stats.nexus_score}</div><div class="label">Nexus Score</div></div>
+    </div>
+
+    <div class="flex-between mb-16">
+      <h3>Your applications</h3>
+      <a href="browse.html" class="btn btn-secondary btn-sm">Browse more gigs</a>
+    </div>
+    <div class="card">
+      ${
+        data.applications.length
+          ? data.applications.map((a) => `
+            <div class="app-row">
+              <div>
+                <a href="gig-detail.html?id=${a.gig_id}" style="font-weight:700;">${escapeHtml(a.gig_title)}</a>
+                <p class="muted mt-8" style="font-size:0.85rem;">Your offer: ₦${a.price.toLocaleString()} · ${timeAgo(a.created_at)}</p>
+              </div>
+              ${statusBadge(a.status)}
+            </div>
+          `).join("")
+          : `<div class="empty-state"><div class="icon">📋</div><p>You haven't applied to any gigs yet.</p><a href="browse.html" class="btn btn-primary mt-16">Browse open gigs</a></div>`
+      }
+    </div>
+  `;
+}
+
+async function loadDashboard() {
+  try {
+    const data = await Api.dashboard();
+    if (data.role === "client") {
+      loadClientDashboard(data);
+    } else {
+      loadFreelancerDashboard(data);
+    }
+  } catch (err) {
+    content.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${escapeHtml(err.message)}</p></div>`;
+  }
+}
+
+if (Auth.isLoggedIn()) loadDashboard();
+</script>
+</body>
+</html>

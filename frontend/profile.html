@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile — Nexus Forge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+      <div class="container nav-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-mark"></span> Nexus Forge
+        </a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html" class="active">Home</a>
+          <a href="browse.html" class="">Browse Gigs</a>
+        </div>
+        <div class="nav-actions">
+          <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
+                 <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>
+        </div>
+      </div>
+    </nav>
+
+
+<section class="section-sm">
+  <div class="container" style="max-width:640px;">
+    <div id="profileContent">
+      <div class="page-loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+</section>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+renderNav('profile');
+if (!requireLogin()) { /* redirected */ }
+
+async function loadProfile() {
+  const content = document.getElementById("profileContent");
+  try {
+    const { user } = await Api.me();
+    Auth.setUser(user);
+
+    content.innerHTML = `
+      <div class="card text-center mb-24">
+        <div class="avatar" style="margin-inline:auto; width:64px; height:64px; font-size:1.6rem;">
+          ${escapeHtml(user.name.charAt(0).toUpperCase())}
+        </div>
+        <h2 class="mt-16">${escapeHtml(user.name)}</h2>
+        <p class="muted">${escapeHtml(user.email)}</p>
+        <div class="flex gap-8 mt-16" style="justify-content:center; flex-wrap:wrap;">
+          <span class="badge ${user.role === 'client' ? 'badge-orange' : 'badge-green'}">${user.role === 'client' ? '🏢 Client' : '🧑‍💻 Freelancer'}</span>
+          ${user.is_student ? `<span class="badge badge-grey">🎓 Student Verified</span>` : ""}
+        </div>
+      </div>
+
+      <div class="card mb-24">
+        <div class="grid grid-2">
+          <div class="stat-card"><div class="num">${user.nexus_score}</div><div class="label">Nexus Score</div></div>
+          <div class="stat-card"><div class="num">${new Date(user.created_at + "Z").toLocaleDateString()}</div><div class="label">Member Since</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="mb-16">Account details</h3>
+        <div class="form-group">
+          <label class="form-label">Full name</label>
+          <input class="form-control" value="${escapeHtml(user.name)}" disabled>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-control" value="${escapeHtml(user.email)}" disabled>
+        </div>
+        <p class="form-hint">Profile editing is coming soon — for now, reach out to update your details.</p>
+      </div>
+    `;
+  } catch (err) {
+    content.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><p>${escapeHtml(err.message)}</p></div>`;
+  }
+}
+
+if (Auth.isLoggedIn()) loadProfile();
+</script>
+</body>
+</html>

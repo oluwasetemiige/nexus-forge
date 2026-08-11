@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post a Gig — Nexus Forge</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+      <div class="container nav-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-mark"></span> Nexus Forge
+        </a>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+        <div class="nav-links" id="navLinks">
+          <a href="index.html" class="active">Home</a>
+          <a href="browse.html" class="">Browse Gigs</a>
+        </div>
+        <div class="nav-actions">
+          <a href="login.html"><button class="btn btn-ghost btn-sm" id="navLogout">Log out</button></a>
+        </div>
+      </div>
+    </nav>
+
+
+<section class="section-sm">
+  <div class="container" style="max-width:640px;">
+    <h2 class="mb-8">Post a gig</h2>
+    <p class="muted mb-24">Describe the work — the more detail, the better the applications.</p>
+
+    <div class="card">
+      <form id="gigForm">
+        <div class="form-group">
+          <label class="form-label" for="title">Gig title</label>
+          <input class="form-control" id="title" type="text" placeholder="e.g. Design a logo for a coffee shop" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Description</label>
+          <textarea class="form-control" id="description" placeholder="What do you need done? Include scope, expectations, and any references." required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="category">Category</label>
+            <select class="form-control" id="category">
+              <option>Design</option>
+              <option>Writing</option>
+              <option>Development</option>
+              <option>Marketing</option>
+              <option>Video & Audio</option>
+              <option>Data</option>
+              <option>General</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="budgetType">Budget type</label>
+            <select class="form-control" id="budgetType">
+              <option value="fixed">Fixed price</option>
+              <option value="hourly">Hourly rate</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="budget">Budget (₦)</label>
+            <input class="form-control" id="budget" type="number" min="0" step="1" placeholder="25000" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="deadline">Deadline (optional)</label>
+            <input class="form-control" id="deadline" type="date">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="checkbox-row">
+            <input type="checkbox" id="beginnerFriendly">
+            <label for="beginnerFriendly" style="font-size:0.9rem;">Beginner Friendly</label>
+          </div>
+        </div>
+
+        <div id="gigError"></div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="gigBtn">Post gig</button>
+      </form>
+    </div>
+  </div>
+</section>
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo mb-16"><span class="logo-mark"></span> Nexus Forge</div>
+        <p class="muted" style="font-size:0.88rem; max-width:280px;">The beginner-first freelance marketplace, built in Nigeria-first with global ambitions.</p>
+      </div>
+      <div>
+        <h4>Platform</h4>
+        <ul><li><a href="browse.html">Browse Gigs</a></li><li><a href="signup.html">Sign up</a></li><li><a href="login.html">Log in</a></li></ul>
+      </div>
+      <div>
+        <h4>For Freelancers</h4>
+        <ul><li><a href="#features">Beginner Boost</a></li><li><a href="#features">Skill Quizzes</a></li><li><a href="#features">Nexus Score</a></li></ul>
+      </div>
+      <div>
+        <h4>For Clients</h4>
+        <ul><li><a href="post-gig.html">Post a Gig</a></li><li><a href="#features">Dispute Shield</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Nexus Forge. All rights reserved.</span>
+      <span>Made for beginners, everywhere.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
+renderNav('post-gig');
+
+if (!requireLogin()) {
+  // redirected to login
+} else {
+  const user = Auth.getUser();
+  if (user.role !== "client") {
+    document.querySelector(".container").innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🚫</div>
+        <h3>Client accounts only</h3>
+        <p class="mt-8 muted">Only client accounts can post gigs. Freelancer accounts can browse and apply instead.</p>
+        <a href="browse.html" class="btn btn-primary mt-24">Browse gigs</a>
+      </div>`;
+  }
+}
+
+document.getElementById("gigForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("gigBtn");
+  const errBox = document.getElementById("gigError");
+  btn.disabled = true;
+  btn.textContent = "Posting...";
+
+  const payload = {
+    title: document.getElementById("title").value.trim(),
+    description: document.getElementById("description").value.trim(),
+    category: document.getElementById("category").value,
+    budget_type: document.getElementById("budgetType").value,
+    budget: document.getElementById("budget").value,
+    deadline: document.getElementById("deadline").value || null,
+    beginner_friendly: document.getElementById("beginnerFriendly").checked,
+  };
+
+  try {
+    const data = await Api.createGig(payload);
+    showToast("Gig posted!");
+    window.location.href = `gig-detail.html?id=${data.gig.id}`;
+  } catch (err) {
+    errBox.innerHTML = `<p style="color:var(--danger); font-size:0.85rem; margin-bottom:12px;">${escapeHtml(err.message)}</p>`;
+    btn.disabled = false;
+    btn.textContent = "Post gig";
+  }
+});
+</script>
+</body>
+</html>
