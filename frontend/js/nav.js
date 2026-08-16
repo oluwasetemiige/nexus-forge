@@ -16,7 +16,7 @@ function renderNav(activePage = "") {
     <nav class="navbar">
       <div class="container nav-inner">
         <a href="index.html" class="logo">
-          <span class="logo-mark">⚡</span> Nexus Forge
+          <span class="logo-mark"></span> Nexus Forge
         </a>
         <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
         <div class="nav-links" id="navLinks">

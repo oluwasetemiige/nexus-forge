@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<nav class="navbar">
+<nav class="navbar" id="nav-root">
       <div class="container nav-inner">
         <a href="index.html" class="logo">
           <span class="logo-mark"></span> Nexus Forge
@@ -56,8 +56,8 @@ async function loadProfile() {
         <h2 class="mt-16">${escapeHtml(user.name)}</h2>
         <p class="muted">${escapeHtml(user.email)}</p>
         <div class="flex gap-8 mt-16" style="justify-content:center; flex-wrap:wrap;">
-          <span class="badge ${user.role === 'client' ? 'badge-orange' : 'badge-green'}">${user.role === 'client' ? '🏢 Client' : '🧑‍💻 Freelancer'}</span>
-          ${user.is_student ? `<span class="badge badge-grey">🎓 Student Verified</span>` : ""}
+          <span class="badge ${user.role === 'client' ? 'badge-orange' : 'badge-green'}">${user.role === 'client' ? 'Client' : ' Freelancer'}</span>
+          ${user.is_student ? `<span class="badge badge-grey">Student Verified</span>` : ""}
         </div>
       </div>
 
@@ -78,7 +78,7 @@ async function loadProfile() {
           <label class="form-label">Email</label>
           <input class="form-control" value="${escapeHtml(user.email)}" disabled>
         </div>
-        <p class="form-hint">Profile editing is coming soon — for now, reach out to update your details.</p>
+        <p class="form-hint">Profile editing is coming soon <br> For now, reach out to update your details and contact us at oluwasetemiige@gmail.com</p>
       </div>
     `;
   } catch (err) {
