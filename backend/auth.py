@@ -9,7 +9,7 @@ Authentication helpers used across all route files.
 """
 
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 
 from flask import request, jsonify
@@ -20,20 +20,72 @@ from database import get_db
 # Core helpers
 # ---------------------------------------------------------------------------
 def current_user():
-    """Extract and validate Bearer token → return user Row or None."""
+    """
+    Get the currently authenticated user from the Authorization header.
+
+    Expected format:
+        Authorization: Bearer <token>
+
+    Returns:
+        user row, or None if authentication fails.
+    """
+
     header = request.headers.get("Authorization", "")
-    if not header.startswith("Bearer "):
+
+    if not header:
         return None
-    token = header.split(" ", 1)[1].strip()
+
+    parts = header.split(" ", 1)
+
+    if len(parts) != 2:
+        return None
+
+    scheme, token = parts
+
+    if scheme.lower() != "bearer" or not token.strip():
+        return None
+
+    token = token.strip()
+
     db = get_db()
-    return db.execute(
-        """SELECT users.*
-           FROM tokens
-           JOIN users ON tokens.user_id = users.id
-           WHERE tokens.token = ?""",
-        (token,),
+
+    # IMPORTANT:
+    # The table is called "tokens", so use tokens.expires_at.
+    token_row = db.execute(
+        """
+        SELECT
+            tokens.token,
+            tokens.user_id,
+            tokens.created_at,
+            tokens.expires_at
+        FROM tokens
+        JOIN users
+            ON tokens.user_id = users.id
+        WHERE tokens.token = ?
+          AND (
+              tokens.expires_at IS NULL
+              OR tokens.expires_at > ?
+          )
+        """,
+        (
+            token,
+            datetime.utcnow().isoformat(),
+        ),
     ).fetchone()
 
+    if token_row is None:
+        return None
+
+    user_row = db.execute(
+        """
+        SELECT *
+        FROM users
+        WHERE id = ?
+        """,
+        (token_row["user_id"],),
+    ).fetchone()
+
+    return user_row
 
 def require_auth():
     """
@@ -57,11 +109,16 @@ def require_auth():
 def create_token(user_id: int) -> str:
     """Generate a secure token and persist it to the DB."""
     token = secrets.token_hex(32)
-    now   = datetime.utcnow().isoformat()
+    now   = datetime.utcnow()
+    expires_at = now + timedelta(days=7)
     db    = get_db()
     db.execute(
-        "INSERT INTO tokens (token, user_id, created_at) VALUES (?, ?, ?)",
-        (token, user_id, now),
+        "INSERT INTO tokens (token, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)",
+        (token, 
+         user_id,
+           now.isoformat(), 
+           expires_at.isoformat(),
+        ),
     )
     db.commit()
     return token
