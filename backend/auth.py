@@ -16,6 +16,8 @@ from flask import request, jsonify
 from database import get_db
 
 
+
+
 # ---------------------------------------------------------------------------
 # Core helpers
 # ---------------------------------------------------------------------------
@@ -31,6 +33,10 @@ def current_user():
     """
 
     header = request.headers.get("Authorization", "")
+    token = request.cookies.get("nf_token")
+
+    if header.startwith("Bearer "):
+        token = header[7:].strip()
 
     if not header:
         return None
