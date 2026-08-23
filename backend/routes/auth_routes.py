@@ -76,6 +76,7 @@ def login():
 
     token = create_token(user_row["id"])
     return jsonify({"token": token, "user": user_to_dict(user_row)})
+                                                         
 
 
 # ---------------------------------------------------------------------------

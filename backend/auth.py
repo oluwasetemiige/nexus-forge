@@ -35,7 +35,7 @@ def current_user():
     header = request.headers.get("Authorization", "")
     token = request.cookies.get("nf_token")
 
-    if header.startwith("Bearer "):
+    if header.startswith("Bearer "):
         token = header[7:].strip()
 
     if not header:
@@ -97,7 +97,7 @@ def require_auth():
     """
     Call at the top of any protected route.
     Returns (user_row, None) on success, or (None, error_response) on failure.
-
+   
     Usage:
         user, err = require_auth()
         if err:

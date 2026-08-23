@@ -7,7 +7,24 @@ A working prototype of Nexus Forge: plain HTML/CSS/JS frontend, Python (Flask) b
 ```
 nexus-forge/
 ├── backend/
-│   ├── app.py              # Flask API (auth, gigs, applications, dashboard)
+     ├──routes
+            ├──_pycache_
+                ├──_init_.cpython-313
+                ├── application_routes.cpython-313
+                ├── auth_routes.cpython-313
+                ├── dashboard_routes.cpython-313
+                ├── gig_routes.cpython-313                
+        ├──_init.py_
+        ├──application.py
+        ├──auth_routes.py
+        ├──dashboard.py
+        ├──gig_routes.py
+
+│   ├── app.py 
+    ├── auth.py
+    ├──config.py
+    ├──database.py
+    ├──models.py            # Flask API (auth, gigs, applications, dashboard)
 │   ├── requirements.txt
 │   └── nexus_forge.db      # created automatically on first run
 └── frontend/
@@ -39,11 +56,13 @@ This starts the API at `http://localhost:5000` and creates `nexus_forge.db` auto
 
 **2. Open the frontend**
 
-Just open `frontend/index.html` directly in your browser, or serve it with a simple static server (recommended, avoids some browser file:// quirks):
+Just open `http://localhost:8000` directly in your browser, or serve it with a simple static server (recommended, avoids some browser file:// quirks):
 
 ```bash
 cd frontend
 python -m http.server 8000
+cd backend
+python app.py
 ```
 
 Then visit `http://localhost:8000`.

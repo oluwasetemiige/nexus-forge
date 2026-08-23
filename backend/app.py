@@ -17,32 +17,14 @@ Run:
     python app.py
 """
 
-from flask import Flask, make_response, request,jsonify
+from flask import Flask, make_response,request,jsonify
 from config import DEBUG, HOST, PORT
 from database import init_db, close_db
 from routes.auth_routes        import auth_bp, login
 from routes.gig_routes         import gig_bp
 from routes.application_routes import application_bp
 from routes.dashboard_routes   import dashboard_bp
-from auth import create_token
 
-
-@auth_bp.route("/login", methods=["POST"])
-def login():
- token = create_token(user_row["id"])
-  response = make_response(jsonify({
-     "message": "Login Successfully",
-    "user": user_to_dict(user_row)
-  }))
- response.set_cookies(
-    "nf_token",
-    token,
-    httponly = True
-    secure = False
-    samesite = "lax"
-    max_age = 7 * 24 * 60 * 60
- )
- return response
 
 
 # ---------------------------------------------------------------------------
