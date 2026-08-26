@@ -35,7 +35,7 @@
         <div class="gig-top">
           <div>
             <h1 style="font-size:1.6rem;">Design flyers</h1>
-            <p class="muted mt-8">Posted by subomi · 59m ago</p>
+            <p class="muted mt-8">Posted by  · </p>
           </div>
           <span class="budget" style="font-size:1.4rem;">₦30</span>
         </div>
@@ -100,7 +100,7 @@ function applicationRow(app) {
   return `
     <div class="app-row">
       <div>
-        <strong>${escapeHtml(app.freelancer_name)}</strong> — ₦${app.price.toLocaleString()}
+        <strong>${escapeHtml(app.freelancer_name)}</strong> — $${app.price.toLocaleString()}
         <p class="muted mt-8" style="font-size:0.88rem;">${escapeHtml(app.proposal)}</p>
       </div>
       <div class="flex gap-8" style="align-items:center;">
@@ -133,7 +133,7 @@ async function loadGig() {
   }
   try {
     const { gig } = await Api.getGig(gigId);
-    const budgetLabel = gig.budget_type === "hourly" ? `₦${gig.budget}/hr` : `₦${gig.budget.toLocaleString()}`;
+    const budgetLabel = gig.budget_type === "hourly" ? `$${gig.budget}/hr` : `$${gig.budget.toLocaleString()}`;
     const isOwner = currentUser && currentUser.id === gig.client_id;
     const alreadyApplied = currentUser && gig.applications.some((a) => a.freelancer_id === currentUser.id);
 
@@ -182,14 +182,14 @@ async function loadGig() {
       applySection.innerHTML = `<p class="text-center muted">This gig is no longer accepting applications.</p>`;
     } else {
       applySection.innerHTML = `
-        <h3 class="mb-16"> for this gig</h3>
+        <h3 class="mb-16">Apply for this gig</h3>
         <form id="applyForm">
           <div class="form-group">
             <label class="form-label">Your proposal</label>
             <textarea class="form-control" id="proposal" placeholder="Explain why you're a great fit..." required></textarea>
           </div>
           <div class="form-group">
-            <label class="form-label">Your price (₦)</label>
+            <label class="form-label">Your price ($)</label>
             <input class="form-control" id="price" type="number" min="0" step="1" placeholder="${gig.budget}" required>
           <div id="applyError"></div>
           <button type="submit" class="btn btn-primary btn-block" id="applyBtn">Submit application</button>

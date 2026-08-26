@@ -92,7 +92,7 @@ const categorySelect = document.getElementById("categorySelect");
 const beginnerOnly = document.getElementById("beginnerOnly");
 
 function gigCardHtml(gig) {
-  const budgetLabel = gig.budget_type === "hourly" ? `₦${gig.budget}/hr` : `₦${gig.budget.toLocaleString()}`;
+  const budgetLabel = gig.budget_type === "hourly" ? `$${gig.budget}/hr` : `$${gig.budget.toLocaleString()}`;
   return `
     <a href="gig-detail.html?id=${gig.id}" class="card gig-card">
       <div class="gig-top">

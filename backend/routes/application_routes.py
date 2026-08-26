@@ -101,12 +101,9 @@ def update_application_status(app_id):
         return jsonify({"error": "Not authorized to update this application"}), 403
 
     # ── Update ─────────────────────────────────────────────────────────────
-    db.execute("UPDATE applications SET status = ? WHERE id = ?", (status, app_id))
-    if status == "accepted":
-        # Mark gig as in-progress when a proposal is accepted
-        db.execute(
-            "UPDATE gigs SET status = 'in_progress' WHERE id = ?",
-            (application["gig_id"],),
-        )
-    db.commit()
+    db.execute(
+        "UPDATE applications SET status = ? WHERE id = ?",
+          (status, app_id)
+          )
+    db.commit()    
     return jsonify({"ok": True, "status": status})
