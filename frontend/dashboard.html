@@ -108,12 +108,12 @@ async function loadClientDashboard(data) {
             <div class="app-row">
               <div>
                 <a href="gig-detail.html?id=${g.id}" style="font-weight:700;">${escapeHtml(g.title)}</a>
-                <p class="muted mt-8" style="font-size:0.85rem;">₦${g.budget.toLocaleString()} · ${escapeHtml(g.category)} · ${timeAgo(g.created_at)}</p>
+                <p class="muted mt-8" style="font-size:0.85rem;">$${g.budget.toLocaleString()} · ${escapeHtml(g.category)} · ${timeAgo(g.created_at)}</p>
               </div>
               ${statusBadge(g.status)}
             </div>
           `).join("")
-          : `<div class="empty-state"><div class="icon">📋</div><p>You haven't posted any gigs yet.</p><a href="post-gig.html" class="btn btn-primary mt-16">Post your first gig</a></div>`
+          : `<div class="empty-state"><div class="icon"></div><p>You haven't posted any gigs yet.</p><a href="post-gig.html" class="btn btn-primary mt-16">Post your first gig</a></div>`
       }
     </div>
   `;

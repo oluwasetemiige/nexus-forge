@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Messages | Nexus Forge</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    
+</head>
+
+<body>
+
+    <div class="messages-page">
+
+        <!-- Conversation List -->
+        <aside class="conversation-panel">
+
+            <div class="conversation-header">
+                <h2>Messages</h2>
+            </div>
+
+            <div id="conversationList">
+
+                <div class="conversation active"
+                     onclick="openConversation('David')">
+
+                    <div class="avatar">D</div>
+
+                    <div class="conversation-info">
+                        <div class="conversation-name">David</div>
+                        <div class="last-message">
+                            Hey, I can start tomorrow.
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="conversation"
+                     onclick="openConversation('Sarah')">
+
+                    <div class="avatar">S</div>
+
+                    <div class="conversation-info">
+                        <div class="conversation-name">Sarah</div>
+                        <div class="last-message">
+                            Thanks for the opportunity!
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- Chat -->
+        <main class="chat-panel">
+
+            <header class="chat-header">
+
+                <div class="chat-user">
+
+                    <div class="avatar" id="chatAvatar">
+                        D
+                    </div>
+
+                    <div>
+                        <strong id="chatName">
+                            David
+                        </strong>
+
+                        <div class="online">
+                            ● Online
+                        </div>
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <!-- Messages -->
+            <section class="messages" id="messages">
+
+                <div class="message received">
+                    Hey! I can start working on the project tomorrow.
+                    <span class="message-time">
+                        10:32 AM
+                    </span>
+                </div>
+
+                <div class="message sent">
+                    Perfect. I'll send you the project details.
+                    <span class="message-time">
+                        10:35 AM
+                    </span>
+                </div>
+
+                <div class="message received">
+                    Sounds good 👍
+                    <span class="message-time">
+                        10:36 AM
+                    </span>
+                </div>
+
+            </section>
+
+
+            <!-- Input -->
+            <form class="message-input-area"
+                  id="messageForm">
+
+                <input
+                    type="text"
+                    id="messageInput"
+                    class="message-input"
+                    placeholder="Type a message..."
+                    autocomplete="off"
+                >
+
+                <button
+                    type="submit"
+                    class="send-button">
+                    ➤
+                </button>
+
+            </form>
+
+        </main>
+
+    </div>
+
+
+    <script>
+
+        const params = new
+        URLSearchParams(window.location.search);
+        const userId = params.get("user_id");
+
+        if(!userId){
+            alert("No user Selected.");
+        }
+
+
+        const messageForm =
+            document.getElementById("messageForm");
+
+        const messageInput =
+            document.getElementById("messageInput");
+
+        const messages =
+            document.getElementById("messages");
+
+
+        messageForm.addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const text =
+                messageInput.value.trim();
+
+            if (!text) return;
+
+
+            const message =
+                document.createElement("div");
+
+            message.className = "message sent";
+
+            message.innerHTML = `
+                ${escapeHtml(text)}
+                <span class="message-time">
+                    Just now
+                </span>
+            `;
+
+            messages.appendChild(message);
+
+            messageInput.value = "";
+
+            messages.scrollTop =
+                messages.scrollHeight;
+
+        });
+
+
+        function openConversation(name) {
+
+            document.getElementById("chatName")
+                .textContent = name;
+
+            document.getElementById("chatAvatar")
+                .textContent = name.charAt(0);
+
+            document.querySelectorAll(".conversation")
+                .forEach(item => {
+                    item.classList.remove("active");
+                });
+
+            event.currentTarget.classList.add("active");
+
+        }
+
+
+        function escapeHtml(text) {
+
+            const div = document.createElement("div");
+
+            div.textContent = text;
+
+            return div.innerHTML;
+        }
+
+    </script>
+
+</body>
+</html>
