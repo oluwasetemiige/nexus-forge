@@ -15,10 +15,11 @@
         </a>
         <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
         <div class="nav-links" id="navLinks">
-          <a href="index.html" class="">Home</a>
+          <a href="index.html" class=""  id="homeLink">Home</a>
           <a href="browse.html" class="">Browse Gigs</a>
           <a href="dashboard.html" class="active">Dashboard</a>
           <a href="profile.html" class="">Profile</a>
+          <a href="message.html" id="messageLink" style="display: none;">Message</a>
         </div>
         <div class="nav-actions">
           <span class="muted" style="font-size:0.85rem;">Hi, </span>
@@ -65,6 +66,26 @@
 <script src="js/api.js"></script>
 <script src="js/nav.js"></script>
 <script>
+
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  const homeLink = document.getElementById("homeLink");
+  const messageLink = document.getElementById("messageLink");
+  if(typeof Auth != "undefined"&& Auth.isLoggedIn()){
+    if(homeLink){
+      homeLinks.style.display ="none";
+
+      if(messageLink){
+        messageLink.style.display = "inline-flex"
+      }
+    }else{
+      if(messageLink){
+        messageLink.style.display = "none"
+      }
+    }
+  }
+});
+
 renderNav('dashboard');
 if (!requireLogin()) { /* redirected */ }
 

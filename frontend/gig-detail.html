@@ -110,12 +110,16 @@ function applicationRow(app) {
             ? `<button class="btn btn-sm btn-primary" onclick="respondToApp(${app.id}, 'accepted')">Accept</button>
                <button class="btn btn-sm btn-danger" onclick="respondToApp(${app.id}, 'rejected')">Decline</button>`
               :app.status  === "accepted"
-              ? '<button class ="btn btn- sm btn-primary" onclick="messageFreelancer(${app.freelancer_id})">Message</button>'
+              ? `<button class ="btn btn- sm btn-primary" onclick="messageFreelancer(${app.freelancer_id})">Message</button>`
             : ""
         }
       </div>
     </div>
   `;
+}
+function messageFreelancer(freelancerId){
+  console.log("message clicked: ", freelancerId);
+  window.location.href = `message.html?user_id=${freelancerId}&gig_id=${gigId}`;
 }
 
 async function respondToApp(appId, status) {
@@ -127,9 +131,7 @@ async function respondToApp(appId, status) {
     showToast(err.message, "error");
   }
 }
-function messageFreelancer(freelancerId){
-  window.location.href = 'message.html?user_id=${freelancerId}&gig_id=${gigId}';
-}
+
 
 async function loadGig() {
   if (!gigId) {

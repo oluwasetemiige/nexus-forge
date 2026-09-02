@@ -30,6 +30,15 @@ const Auth = {
     this.clearToken();
     window.location.href = "index.html";
   },
+  sendMessage:  (payload) => apiRequest("/messages",{
+    method: "POST",
+    body: payload,
+    auth: true
+  }),
+  getMessages: (gigId, userId)=> apiRequest(`/messages/${gigId}/${userId}`,{
+    auth: true
+  }),
+
 };
 
 async function apiRequest(path, { method = "GET", body = null, auth = false } = {}) {

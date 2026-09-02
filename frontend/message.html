@@ -21,7 +21,7 @@
             <div class="conversation-header">
                 <h2>Messages</h2>
             </div>
-
+                
             <div id="conversationList">
 
                 <div class="conversation active"
@@ -143,6 +143,7 @@
         const recieverId = params.get("user_id");
         const gigId = params.get("gig_id");
 
+         
         if(!userId){
             alert("No user Selected.");
         }
@@ -158,7 +159,7 @@
             document.getElementById("messages");
 
 
-        messageForm.addEventListener("submit", function(event) {
+        messageForm.addEventListener("submit", async function(event) {
 
             event.preventDefault();
 
@@ -166,6 +167,17 @@
                 messageInput.value.trim();
 
             if (!text) return;
+            try{
+                await Api.sendmessage({
+                    gigId: Number(gigId),
+                    reciever_id: Number(userId),
+                    content: text
+                });
+                messageInput.value = "";
+                await loadMessages();
+            }catch(error){
+                alert(error.message);  
+            }
 
 
             const message =
@@ -246,30 +258,42 @@
             loadMessages();
         }
 
-        async function loadmessages()
+        async function loadMessages()
         {
             const response = await fetch(
-                '/api/messages/${gigId}/&{recieverId}',
+                `/api/messages/${gigId}/${recieverId}`,
                 {
                     credentials: "include"
                 }
 
             );
-            const data = await response.json();
-            if(!response.ok){
-                console.error(data);
-                return;
+            try{
+                const data = await Api.getMessages(
+                
+                    Number(gigId),
+                    Number(userId)
+                );
+                messages.innerHTML = "";
+                data.messages.forEach(message =>{
+                    const div = document.createElement("div");
+                    const currentUser = Auth.getUser();
+                    div.className = message.sender_id === currentUser.id ?"message sent":"message Recieved";
+                    div.innerHTML = `${escapeHtml(message.content)}
+                    <span class = "message-time">${new Date(message.created_at).toLocaleTimeString([],{
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    })}
+                    </span>
+                     `;
+                     message.appendChild(div);
+                });
+                messages.scrollTop = messages.scrollHeight;
+                
+               
+            } catch(error){
+                console.error("could not load message")
             }
-            message.innerHTML = "";
-            data.forEach(msg =>{
-                const div = document.createElement("div");
-
-                div.className = msg.sender_id === currentUserId? "message sent": "message recieved";
-                div.textContent =  msg.message;
-                message.appendChild(div)
-            });
-
-            message.scrollTop = message.scrollHeight;
+            loadMessages();
         }
 
     </script>
