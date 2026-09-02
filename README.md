@@ -13,12 +13,14 @@ nexus-forge/
                 ├── application_routes.cpython-313
                 ├── auth_routes.cpython-313
                 ├── dashboard_routes.cpython-313
-                ├── gig_routes.cpython-313                
+                ├── gig_routes.cpython-313
+
         ├──_init.py_
         ├──application.py
         ├──auth_routes.py
         ├──dashboard.py
         ├──gig_routes.py
+        ├──message_route.py
 
 │   ├── app.py 
     ├── auth.py
@@ -36,6 +38,7 @@ nexus-forge/
     ├── post-gig.html       # client-only: post a new gig
     ├── dashboard.html      # role-aware dashboard (client vs freelancer)
     ├── profile.html
+    ├── message.html        # creating messaging between (client and freelancer)
     ├── css/style.css       # shared brand styling (charcoal + molten orange)
     └── js/
         ├── api.js          # fetch wrapper + auth/token handling
