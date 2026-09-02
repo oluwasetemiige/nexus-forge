@@ -84,6 +84,21 @@ CREATE TABLE IF NOT EXISTS applications (
     FOREIGN KEY (gig_id)        REFERENCES gigs(id)  ON DELETE CASCADE,
     FOREIGN KEY (freelancer_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE IF NOT EXISTS messages(
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender_id       INTEGER NOT NULL,
+    reciever_id     INTEGER NOT NULL,
+    gig_id          INTEGER NOT NULL,
+    message         TEXT NOT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (sender_id)  REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (reciever_id)  REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (gig_id)  REFERENCES gigs(id) ON DELETE CASCADE
+);
+
 """
 
 

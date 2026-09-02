@@ -24,6 +24,7 @@ from routes.auth_routes        import auth_bp, login
 from routes.gig_routes         import gig_bp
 from routes.application_routes import application_bp
 from routes.dashboard_routes   import dashboard_bp
+from routes.message_route import message_bp
 
 
 
@@ -54,6 +55,7 @@ def create_app() -> Flask:
     app.register_blueprint(gig_bp,         url_prefix=url)
     app.register_blueprint(application_bp, url_prefix=url)
     app.register_blueprint(dashboard_bp,   url_prefix=url)
+    app.register_blueprint(message_bp,     url_prefix="/api")
 
     return app
 

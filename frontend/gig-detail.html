@@ -111,7 +111,6 @@ function applicationRow(app) {
                <button class="btn btn-sm btn-danger" onclick="respondToApp(${app.id}, 'rejected')">Decline</button>`
               :app.status  === "accepted"
               ? '<button class ="btn btn- sm btn-primary" onclick="messageFreelancer(${app.freelancer_id})">Message</button>'
-
             : ""
         }
       </div>
@@ -129,7 +128,7 @@ async function respondToApp(appId, status) {
   }
 }
 function messageFreelancer(freelancerId){
-  window.location.href = 'message.html?user_id=${freelancerId}';
+  window.location.href = 'message.html?user_id=${freelancerId}&gig_id=${gigId}';
 }
 
 async function loadGig() {
