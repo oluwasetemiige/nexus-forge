@@ -55,7 +55,7 @@ def create_app() -> Flask:
     app.register_blueprint(gig_bp,         url_prefix=url)
     app.register_blueprint(application_bp, url_prefix=url)
     app.register_blueprint(dashboard_bp,   url_prefix=url)
-    app.register_blueprint(message_bp,     url_prefix="/api")
+    app.register_blueprint(message_bp,     url_prefix=url)
 
     return app
 
@@ -64,6 +64,7 @@ def create_app() -> Flask:
 # Entrypoint
 # ---------------------------------------------------------------------------
 app = create_app()
+print(app.url_map)
 
 if __name__ == "__main__":
     init_db()

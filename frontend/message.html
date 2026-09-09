@@ -134,169 +134,141 @@
 
     </div>
 
+<script src="js/api.js"></script>
+<script src="js/nav.js"></script>
+<script>
 
-    <script>
+const params = new URLSearchParams(window.location.search);
 
-        const params = new
-        URLSearchParams(window.location.search);
-        const userId = params.get("user_id");
-        const recieverId = params.get("user_id");
-        const gigId = params.get("gig_id");
+const gigId = params.get("gig_id");
+const userId = params.get("user_id");
 
-         
-        if(!userId){
-            alert("No user Selected.");
-        }
+const messageForm = document.getElementById("messageForm");
+const messageInput = document.getElementById("messageInput");
+const messages = document.getElementById("messages");
 
-
-        const messageForm =
-            document.getElementById("messageForm");
-
-        const messageInput =
-            document.getElementById("messageInput");
-
-        const messages =
-            document.getElementById("messages");
+const currentUser = Auth.getUser();
 
 
-        messageForm.addEventListener("submit", async function(event) {
+// Make sure we have the required information
+if (!gigId || !userId) {
 
-            event.preventDefault();
+    alert("No conversation selected.");
 
-            const text =
-                messageInput.value.trim();
-
-            if (!text) return;
-            try{
-                await Api.sendmessage({
-                    gigId: Number(gigId),
-                    reciever_id: Number(userId),
-                    content: text
-                });
-                messageInput.value = "";
-                await loadMessages();
-            }catch(error){
-                alert(error.message);  
-            }
+}
 
 
-            const message =
-                document.createElement("div");
+// Load messages
+async function loadMessages() {
 
-            message.className = "message sent";
+    if (!gigId || !userId) return;
 
-            message.innerHTML = `
-                ${escapeHtml(text)}
-                <span class="message-time">
-                    Just now
-                </span>
-            `;
+    try {
 
-            messages.appendChild(message);
+        const data = await Api.getMessages(
+            Number(gigId),
+            Number(userId)
+        );
 
-            messageInput.value = "";
+        messages.innerHTML = "";
 
-            messages.scrollTop =
-                messages.scrollHeight;
-
-        });
-
-
-        function openConversation(name) {
-
-            document.getElementById("chatName")
-                .textContent = name;
-
-            document.getElementById("chatAvatar")
-                .textContent = name.charAt(0);
-
-            document.querySelectorAll(".conversation")
-                .forEach(item => {
-                    item.classList.remove("active");
-                });
-
-            event.currentTarget.classList.add("active");
-
-        }
-
-
-        function escapeHtml(text) {
+        data.messages.forEach(message => {
 
             const div = document.createElement("div");
 
-            div.textContent = text;
+            div.className =
+                message.sender_id === currentUser.id
+                    ? "message sent"
+                    : "message received";
 
-            return div.innerHTML;
-        }
+            div.innerHTML = `
+                ${escapeHtml(message.content)}
 
-        async function sendmessage()
-        {
-            const message = messageInput.value.trim();
-
-            if(!message )return;
-
-            const response = await fetch("api/messages",{
-                method: "POST",
-                headers:{
-                    "Content- Type": "application/json"
-                },
-                credentials:"include",
-                body: JSON.stringify({
-                    reciever_id: reciever_id,
-                    gig_id: gigId,
-                    message: message
-                })
-            });
-
-
-            const data = await response.json();
-            if(!response.ok){
-                alert(date.error||"could not send message");
-                return;
-            }
-            messageInput.value = "";
-            loadMessages();
-        }
-
-        async function loadMessages()
-        {
-            const response = await fetch(
-                `/api/messages/${gigId}/${recieverId}`,
-                {
-                    credentials: "include"
-                }
-
-            );
-            try{
-                const data = await Api.getMessages(
-                
-                    Number(gigId),
-                    Number(userId)
-                );
-                messages.innerHTML = "";
-                data.messages.forEach(message =>{
-                    const div = document.createElement("div");
-                    const currentUser = Auth.getUser();
-                    div.className = message.sender_id === currentUser.id ?"message sent":"message Recieved";
-                    div.innerHTML = `${escapeHtml(message.content)}
-                    <span class = "message-time">${new Date(message.created_at).toLocaleTimeString([],{
+                <span class="message-time">
+                    ${new Date(
+                        message.created_at + "Z"
+                    ).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit"
                     })}
-                    </span>
-                     `;
-                     message.appendChild(div);
-                });
-                messages.scrollTop = messages.scrollHeight;
-                
-               
-            } catch(error){
-                console.error("could not load message")
-            }
-            loadMessages();
-        }
+                </span>
+            `;
 
-    </script>
+            messages.appendChild(div);
+
+        });
+
+        messages.scrollTop = messages.scrollHeight;
+
+    } catch (error) {
+
+        console.error("Could not load messages:", error);
+
+        showToast(error.message, "error");
+
+    }
+
+}
+
+
+// Send message
+messageForm.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const text = messageInput.value.trim();
+
+    if (!text) return;
+
+    if (!gigId || !userId) {
+
+        showToast("No conversation selected.", "error");
+
+        return;
+
+    }
+
+    try {
+
+        await Api.sendMessage({
+
+            gig_id: Number(gigId),
+
+            receiver_id: Number(userId),
+
+            content: text
+
+        });
+
+        messageInput.value = "";
+
+        await loadMessages();
+
+    } catch (error) {
+
+        showToast(error.message, "error");
+
+    }
+
+});
+
+
+// Escape HTML
+function escapeHtml(text) {
+
+    const div = document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+
+}
+
+
+// Load messages when page opens
+loadMessages();
+
+</script>
 
 </body>
 </html>

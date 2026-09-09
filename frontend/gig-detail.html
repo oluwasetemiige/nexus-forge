@@ -110,7 +110,7 @@ function applicationRow(app) {
             ? `<button class="btn btn-sm btn-primary" onclick="respondToApp(${app.id}, 'accepted')">Accept</button>
                <button class="btn btn-sm btn-danger" onclick="respondToApp(${app.id}, 'rejected')">Decline</button>`
               :app.status  === "accepted"
-              ? `<button class ="btn btn- sm btn-primary" onclick="messageFreelancer(${app.freelancer_id})">Message</button>`
+              ? `<button class ="btn btn-sm btn-primary" onclick="messageFreelancer(${app.freelancer_id})">Message</button>`
             : ""
         }
       </div>

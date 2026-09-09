@@ -89,13 +89,13 @@ CREATE TABLE IF NOT EXISTS applications (
 CREATE TABLE IF NOT EXISTS messages(
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     sender_id       INTEGER NOT NULL,
-    reciever_id     INTEGER NOT NULL,
+   receiver_id      INTEGER NOT NULL,
     gig_id          INTEGER NOT NULL,
-    message         TEXT NOT NULL,
+    content         TEXT NOT NULL,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (sender_id)  REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (reciever_id)  REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id)  REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (gig_id)  REFERENCES gigs(id) ON DELETE CASCADE
 );
 

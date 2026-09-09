@@ -3,7 +3,7 @@
    Talks to the Flask backend at API_BASE. Handles auth token + errors.
    ========================================================================== */
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "http://localhost:5000/api/";
 
 const Auth = {
   getToken() {
@@ -50,7 +50,7 @@ async function apiRequest(path, { method = "GET", body = null, auth = false } = 
 
   let response;
   try {
-    response = await fetch(`${API_BASE}${path}`, {
+    response = await fetch(`${API_BASE}${path.replace(/^\/+/, "")}`, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
@@ -91,6 +91,10 @@ const Api = {
     apiRequest(`/applications/${id}/status`, { method: "PUT", body: { status }, auth: true }),
 
   dashboard: () => apiRequest("/dashboard", { auth: true }),
+
+  sendMessage:(payload)=>apiRequest("messages",{method: "POST", body: payload, auth: true}),
+  getMessages: (gigId, userId)=> apiRequest(`/messages/${gigId}/${userId}`,
+    {auth: true}),
 };
 
 /* ---------- Toast helper (shared UI feedback) ---------- */
