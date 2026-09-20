@@ -164,6 +164,7 @@ async function loadGig() {
       </div>
 
       <div id="applySection" class="card mt-24"></div>
+      
 
       ${
         isOwner
@@ -184,7 +185,7 @@ async function loadGig() {
     } else if (currentUser.role !== "freelancer") {
       applySection.innerHTML = `<p class="text-center muted">Only Clients accounts can apply to gigs.</p>`;
     } else if (alreadyApplied) {
-      applySection.innerHTML = `<p class="text-center"><span class="badge badge-green">✓ You've applied to this gig</span></p>`;
+      applySection.innerHTML = `<p class="text-center"><span class="badge badge-green">You've applied to this gig</span></p>`;
     } else if (gig.status !== "open") {
       applySection.innerHTML = `<p class="text-center muted">This gig is no longer accepting applications.</p>`;
     } else {

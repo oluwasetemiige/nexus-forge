@@ -61,7 +61,7 @@ async function apiRequest(path, { method = "GET", body = null, auth = false } = 
     );
   }
 
-  let data = {};
+  let data = {}; 
   try {
     data = await response.json();
   } catch (_e) {

@@ -21,7 +21,7 @@
         </div>
         <div class="nav-actions">
           <a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
-                 <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>
+          <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>
         </div>
       </div>
     </nav>
@@ -44,7 +44,7 @@
       <div class="hero-stats">
         <div class="hero-stat"><div class="num">10%</div><div class="label">Flat commission</div></div>
         <div class="hero-stat"><div class="num">5-step</div><div class="label">Escrow protection</div></div>
-        <div class="hero-stat"><div class="num">₦ / $10</div><div class="label">Paystack, Flutterwave & Stripe</div></div>
+        <div class="hero-stat"><div class="num">$10</div><div class="label">Paystack, Flutterwave & Stripe</div></div>
       </div>
     </div>
     <div class="hero-visual">
@@ -55,7 +55,7 @@
       <h3>Design a logo for a coffee shop</h3>
       <p class="muted mt-8" style="font-size:0.9rem;">Looking for a fresh, modern logo. Great first project clear brief, friendly client, fast feedback.</p>
       <div class="flex-between mt-24">
-        <span class="text-gradient" style="font-weight:800; font-size:1.3rem;">₦25,000</span>
+        <span class="text-gradient" style="font-weight:800; font-size:1.3rem;">$500</span>
         <span class="muted" style="font-size:0.85rem;">Fixed price</span>
       </div>
       <div class="divider"></div>
@@ -178,6 +178,11 @@
 
 <script src="js/api.js"></script>
 <script src="js/nav.js"></script>
-<script>renderNav('home');</script>
+<script>renderNav('home');
+  function messageFreelancer(freelancerId){
+  console.log("message clicked: ", freelancerId);
+  window.location.href = `message.html?user_id=${freelancerId}&gig_id=${gigId}`;
+}t
+</script>
 </body>
 </html>

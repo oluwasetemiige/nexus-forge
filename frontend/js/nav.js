@@ -25,6 +25,7 @@ function renderNav(activePage = "") {
           ${loggedIn ? `<a href="dashboard.html" class="${linkClass('dashboard')}">Dashboard</a>` : ""}
           ${loggedIn && user.role === "client" ? `<a href="post-gig.html" class="${linkClass('post-gig')}">Post a Gig</a>` : ""}
           ${loggedIn ? `<a href="profile.html" class="${linkClass('profile')}">Profile</a>` : ""}
+          ${loggedIn ? `<a href="message.html" class="${linkClass('message')}">message</a>` : ""}
         </div>
         <div class="nav-actions">
           ${

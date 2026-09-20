@@ -85,7 +85,7 @@ Then visit `http://localhost:8000`.
 
 - Payments (Paystack/Flutterwave/Stripe) — not wired up, this is UI + data model only
 - Escrow flow — gig `status` field supports it (`open → in_progress → completed`) but no payment holding logic
-- Messaging between client/freelancer
+- Messaging between client/freelancer(client to freelancer but not freelancer to client..)
 - Skill Quizzes, Dispute Shield workflow
 - Profile editing (currently read-only)
 

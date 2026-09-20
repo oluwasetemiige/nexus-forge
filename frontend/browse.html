@@ -19,13 +19,14 @@
           <a href="browse.html" class="">Browse Gigs</a>
           <a href="dashboard.html" class="active">Dashboard</a>
           <a href="profile.html" class="">Profile</a>
-        </div>
+          <a href="message.html" class="">Message</a>
+          </div>
         <div class="nav-actions">
           <span class="muted" style="font-size:0.85rem;">Hi, </span>
-                 <button class="btn btn-ghost btn-sm" id="navLogout">Log out</button>
-        </div>
+          <button class="btn btn-ghost btn-sm" id="navLogout">Log out</button>
       </div>
-    </nav>
+   </div>
+</nav>
 
 
 <section class="section-sm">
@@ -143,6 +144,7 @@ searchInput.addEventListener("input", () => {
 });
 categorySelect.addEventListener("change", loadGigs);
 beginnerOnly.addEventListener("change", loadGigs);
+
 
 loadGigs();
 </script>
