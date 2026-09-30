@@ -24,34 +24,6 @@
                 
             <div id="conversationList">
 
-                <div class="conversation active"
-                     onclick="openConversation('David')">
-
-                    <div class="avatar">D</div>
-
-                    <div class="conversation-info">
-                        <div class="conversation-name">David</div>
-                        <div class="last-message">
-                            Hey, I can start tomorrow.
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="conversation"
-                     onclick="openConversation('Sarah')">
-
-                    <div class="avatar">S</div>
-
-                    <div class="conversation-info">
-                        <div class="conversation-name">Sarah</div>
-                        <div class="last-message">
-                            Thanks for the opportunity!
-                        </div>
-                    </div>
-
-                </div>
-
             </div>
 
         </aside>
@@ -138,76 +110,91 @@
 <script src="js/nav.js"></script>
 <script>
 
-const params = new URLSearchParams(window.location.search);
-
-const gigId = params.get("gig_id");
-const userId = params.get("user_id");
 
 const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
 const messages = document.getElementById("messages");
 
 const currentUser = Auth.getUser();
+let conversation = [];
+let activeconversation = null;
 
 
-// Make sure we have the required information
-if (!gigId || !userId) {
-
-    alert("No conversation selected.");
-
-}
 
 
 // Load messages
-async function loadMessages() {
+async function loadMessages(conversation) {
 
-    if (!gigId || !userId) return;
+  try{
+    const data = await Api.getMessages(
+        Number(conversation.gig_id),
+        Number(conversation.other_user_id)
+    );
+    messages.innerHTML = "";
+    data.messages.forEach(message =>{
+        const div = document.createElement("div");
+        div.className = Number(message.sender_id)=== Number(currentUser.id) ? "message sent": "message Received";
+        div.innerHTML = `${escapeHtml(message.content)}
+                    <span class="message-time">${new Date(message.created_at + "Z").toLocaleTimeString([], {
+                        hour:"2-digit",
+                        minute:"2-digit"
+                    })}</span>`;
+                    messages.appendChild(div);
+                    
+    });
+    messages.scrollTop = messages.scrollHeight;
+  }catch (error){
+    console.error(
+        "could not load messages",
+        error
+    );
+    showToast(
+        error.message,
+        "error"
+    );
+  }
+}
 
-    try {
 
-        const data = await Api.getMessages(
-            Number(gigId),
-            Number(userId)
-        );
 
-        messages.innerHTML = "";
 
-        data.messages.forEach(message => {
-
+async function loadconversations() {
+    try{
+        const data = await Api.getconversation();
+        conversation = data.conversation || [];
+        conversationList.innerHTML = "";
+        if(!conversation.length){
+            conversationList.innerHTML =`<div class="muted" style="padding: 20px;">No message yet</div>`;
+            return;
+        }
+        conversation.forEach((conversation, index) => {
             const div = document.createElement("div");
-
-            div.className =
-                message.sender_id === currentUser.id
-                    ? "message sent"
-                    : "message received";
-
-            div.innerHTML = `
-                ${escapeHtml(message.content)}
-
-                <span class="message-time">
-                    ${new Date(
-                        message.created_at + "Z"
-                    ).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit"
-                    })}
-                </span>
-            `;
-
-            messages.appendChild(div);
-
+            div.className = "conversation";
+            div.innerHTML = `<div class="avatar">${escapeHtml(conversation.other_user_name.charAt(0).toUpperCase())}</div>
+                            <div> class="conversation-info">
+                                <div class="conversation-name">${escapeHtml(conversation.other_user_name)}</div>
+                                <div class="last-message">${escapeHtml(conversation.last_message)}</div>
+                                <div class="muted" style="font-size: 0.75rem;">${escapeHtml(conversation.gig_title)}</div>
+                             </div>
+                             `;
+                             div.addEventListener("click", () => {
+                                openconversation(index);
+                             });
+                             conversationList.appendChild(div);   
         });
-
-        messages.scrollTop = messages.scrollHeight;
-
-    } catch (error) {
-
-        console.error("Could not load messages:", error);
-
-        showToast(error.message, "error");
-
-    }
-
+   
+    }catch(error){
+        console.error(
+            "could not load conversation",
+            error
+        );
+        
+    };
+    showToast(
+        error.message,
+        "error"
+    )
+    
 }
 
 

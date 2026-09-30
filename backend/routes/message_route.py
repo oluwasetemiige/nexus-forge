@@ -177,7 +177,7 @@ def get_messages(gig_id, user_id):
             gig_id,
             content,
             created_at
-        FROM messages
+w        FROM messages
         WHERE gig_id = ?
           AND
             (
@@ -199,3 +199,66 @@ def get_messages(gig_id, user_id):
     return jsonify({
         "messages": [dict(message) for message in messages]
     })
+@message_bp.route("/messages/conservations", methods =["GET"])
+def getconversation():
+    user, err = require_auth()
+    if err: return err
+    db= get_db()
+    rows = db.execute(
+        """
+        SElECT
+            m.id,
+            m.gig_id
+            m.sender_id
+            m.reciever_id
+            m.content
+            m.created_at
+            g.title AS gig_title
+            u.id AS gig_title
+            u.name AS other_user_name
+            u.role AS other_user_role
+        FROM messages m
+        JOIN gigs g ON g.id = m.gig_id
+        JOIN users u ON u.id = 
+        CASE
+             WHEN m.sender_id = ? 
+        THEN m.reciever_id
+        ELSE
+          m.sender_id
+            END 
+        WHERE m.sender_id = ? OR m.reciever_id = ?
+        ORDER by m.id DESC
+        """,
+        (user["id"], user["id"], user["id"])
+    ).fetchall()
+    conversation = []
+    seen = set()
+    for row in rows:
+        key = (
+            row["gig_id"],
+            row["other_user_id"]
+        )
+        if key in seen:
+            continue
+        if not can_message(
+            db,
+            user["id"],
+            row["other_user_id"],
+            row["gig_id"]
+        ):
+            continue
+        seen.add(key)
+
+        conversation.append({
+            "gig_id": row["gig_id"],
+            "gig_title": row["gig_title"],
+            "other_user_id": row["other_user_id"],
+            "other_user_name": row["other_user_row"],
+            "other_user_role":row["other_user_row"],
+            "last_message": row["content"],
+            "last_message_at": row["created_at"]
+        })
+        return jsonify({
+            "conversation": conversation
+        })
+    

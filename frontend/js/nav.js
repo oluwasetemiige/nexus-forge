@@ -25,12 +25,23 @@ function renderNav(activePage = "") {
           ${loggedIn ? `<a href="dashboard.html" class="${linkClass('dashboard')}">Dashboard</a>` : ""}
           ${loggedIn && user.role === "client" ? `<a href="post-gig.html" class="${linkClass('post-gig')}">Post a Gig</a>` : ""}
           ${loggedIn ? `<a href="profile.html" class="${linkClass('profile')}">Profile</a>` : ""}
-          ${loggedIn ? `<a href="message.html" class="${linkClass('message')}">message</a>` : ""}
+
         </div>
         <div class="nav-actions">
           ${
             loggedIn
               ? `<span class="muted" style="font-size:0.85rem;">Hi, ${escapeHtml(user.name.split(" ")[0])}</span>
+              <a href ="message.html" class="nav-message-icon" title ="Messages" arial-label="Open messages" style="display: inline-fles;align-items: center; justify-content:center;width:38px;height:38px;border-radius:50%;color:inherit;text-decoration:none;">
+              <svg xmins="http://www.w3.org/2000/svg" width="21" height="21" viewBox = "0 0 24 24" fill ="none" stroke="CurrentColor" stroke-width ="1.8" stroke-linecap ="round" stroke-linejoin ="round">
+              <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8
+                          8.5 8.5 0 0 1-7.6 4.7
+                          8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7
+                          a8.4 8.4 0 0 1-.9-3.8
+                          A8.5 8.5 0 0 1 8.7 3.9
+                          a8.4 8.4 0 0 1 3.8-.9h.5
+                          a8.5 8.5 0 0 1 8 8v.5z"/>
+                </svg>
+                </a>
                  <button class="btn btn-ghost btn-sm" id="navLogout">Log out</button>`
               : `<a href="login.html" class="btn btn-ghost btn-sm">Log in</a>
                  <a href="signup.html" class="btn btn-primary btn-sm">Sign up</a>`

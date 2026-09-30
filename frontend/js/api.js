@@ -38,7 +38,7 @@ const Auth = {
   getMessages: (gigId, userId)=> apiRequest(`/messages/${gigId}/${userId}`,{
     auth: true
   }),
-
+  getconversation: () => apiRequest("messages/conversation",{auth: true}),
 };
 
 async function apiRequest(path, { method = "GET", body = null, auth = false } = {}) {
