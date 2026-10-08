@@ -53,35 +53,7 @@
                 </div>
 
             </header>
-
-
-            <!-- Messages -->
-            <section class="messages" id="messages">
-
-                <div class="message received">
-                    Hey! I can start working on the project tomorrow.
-                    <span class="message-time">
-                        10:32 AM
-                    </span>
-                </div>
-
-                <div class="message sent">
-                    Perfect. I'll send you the project details.
-                    <span class="message-time">
-                        10:35 AM
-                    </span>
-                </div>
-
-                <div class="message received">
-                    Sounds good 👍
-                    <span class="message-time">
-                        10:36 AM
-                    </span>
-                </div>
-
-            </section>
-
-
+            
             <!-- Input -->
             <form class="message-input-area"
                   id="messageForm">
@@ -197,6 +169,20 @@ async function loadconversations() {
     
 }
 
+//open conversation 
+async function loadconversation (index) {
+    
+    const conversation =openconversation[index];
+    if(!conversation)return;
+    activeconversation = conversation;
+    document.getElementById("chatAvatar").textContent = conversation.other_user_name.charAt(0).toUpperCase();
+    document.getElementById("chatname").textContent = conversation.other_user_name;
+    messageInput.disabled = false;
+    messageForm.querySelector("button").disabled = false;
+    messageInput.placeholder = "type your message....";
+    await loadMessages(conversations);
+}
+
 
 // Send message
 messageForm.addEventListener("submit", async function(event) {
@@ -204,24 +190,17 @@ messageForm.addEventListener("submit", async function(event) {
     event.preventDefault();
 
     const text = messageInput.value.trim();
-
+    
     if (!text) return;
 
-    if (!gigId || !userId) {
-
-        showToast("No conversation selected.", "error");
-
-        return;
-
-    }
-
+   
     try {
 
         await Api.sendMessage({
 
-            gig_id: Number(gigId),
+            gig_id: Number(activeconversation.gig_id),
 
-            receiver_id: Number(userId),
+            receiver_id: Number(activeconversation.other_user_id),
 
             content: text
 
@@ -229,7 +208,8 @@ messageForm.addEventListener("submit", async function(event) {
 
         messageInput.value = "";
 
-        await loadMessages();
+        await loadMessages(activeconversation);
+        await loadconversations();
 
     } catch (error) {
 
@@ -253,7 +233,7 @@ function escapeHtml(text) {
 
 
 // Load messages when page opens
-loadMessages();
+loadconversations();
 
 </script>
 

@@ -200,7 +200,7 @@ w        FROM messages
         "messages": [dict(message) for message in messages]
     })
 @message_bp.route("/messages/conservations", methods =["GET"])
-def getconversation():
+def getconversations():
     user, err = require_auth()
     if err: return err
     db= get_db()
