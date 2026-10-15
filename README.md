@@ -52,7 +52,7 @@ nexus-forge/
 ```bash
 cd backend
 pip install -r requirements.txt
-python app.py
+python app.py          # add NF_DEBUG=1 in front for debug/auto-reload
 ```
 
 This starts the API at `http://localhost:5000` and creates `nexus_forge.db` automatically the first time you run it.
@@ -63,7 +63,7 @@ Just open `http://localhost:8000` directly in your browser, or serve it with a s
 
 ```bash
 cd frontend
-python -m http.server 8000
+python serve.py          # same as http.server, but with caching disabled
 cd backend
 python app.py
 ```
@@ -81,13 +81,14 @@ Then visit `http://localhost:8000`.
 - **Dashboard**: stats + your gigs (client) or your applications (freelancer)
 - **Student Verification badge**, **Nexus Score** (starts at 50), **Beginner Friendly** gig tagging
 
+- **Messaging**: client and freelancer can chat (text + JPG/PNG/GIF/WEBP/PDF attachments up to 10 MB) once an application is accepted. Conversations appear for both sides immediately after acceptance. Existing databases are migrated automatically on startup.
+
 ## What's stubbed / not yet built
 
 - Payments (Paystack/Flutterwave/Stripe) — not wired up, this is UI + data model only
 - Escrow flow — gig `status` field supports it (`open → in_progress → completed`) but no payment holding logic
-- Messaging between client/freelancer(client to freelancer but not freelancer to client..)
-- Skill Quizzes, Dispute Shield workflow
-- Profile editing (currently read-only)
+- Skill Quizzes, Dispute Shield workflow(progress update)
+- Profile editing (currently read-only)(progress update II)
 
 These are natural next slices to build once you want to go deeper on any one of them.
 

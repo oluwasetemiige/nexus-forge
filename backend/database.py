@@ -86,26 +86,54 @@ CREATE TABLE IF NOT EXISTS applications (
 );
 
 
-CREATE TABLE IF NOT EXISTS messages(
+CREATE TABLE IF NOT EXISTS messages (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     sender_id       INTEGER NOT NULL,
-   receiver_id      INTEGER NOT NULL,
+    receiver_id     INTEGER NOT NULL,
     gig_id          INTEGER NOT NULL,
-    content         TEXT NOT NULL,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    content         TEXT    NOT NULL DEFAULT '',
+    created_at      TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    attachment_name TEXT,
+    attachment_path TEXT,
+    attachment_mime TEXT,
+    attachment_size INTEGER,
 
-    FOREIGN KEY (sender_id)  REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (receiver_id)  REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (gig_id)  REFERENCES gigs(id) ON DELETE CASCADE
+    FOREIGN KEY (sender_id)   REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (gig_id)      REFERENCES gigs(id)  ON DELETE CASCADE
 );
 
+CREATE INDEX IF NOT EXISTS idx_messages_thread
+    ON messages (gig_id, sender_id, receiver_id, id);
+
 """
+
+
+# Columns added to `messages` after the first version of the schema.
+# CREATE TABLE IF NOT EXISTS never alters a table that already exists,
+# so older databases need these added explicitly.
+MESSAGE_ATTACHMENT_COLUMNS = {
+    "attachment_name": "TEXT",
+    "attachment_path": "TEXT",
+    "attachment_mime": "TEXT",
+    "attachment_size": "INTEGER",
+}
+
+
+def migrate_db(conn):
+    """Bring an older nexus_forge.db up to the current schema."""
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(messages)")}
+    for column, col_type in MESSAGE_ATTACHMENT_COLUMNS.items():
+        if column not in existing:
+            conn.execute(f"ALTER TABLE messages ADD COLUMN {column} {col_type}")
+            print(f"🔧 Migrated: messages.{column} added")
 
 
 def init_db():
     """Create all tables if they don't exist. Called once at startup."""
     conn = sqlite3.connect(DB_PATH)
     conn.executescript(SCHEMA)
+    migrate_db(conn)
     conn.commit()
     conn.close()
     print(f"✅ Database ready → {DB_PATH}")

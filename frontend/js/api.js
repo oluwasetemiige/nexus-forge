@@ -30,19 +30,13 @@ const Auth = {
     this.clearToken();
     window.location.href = "index.html";
   },
-  sendMessage:  (payload) => apiRequest("/messages",{
-    method: "POST",
-    body: payload,
-    auth: true
-  }),
-  getMessages: (gigId, userId)=> apiRequest(`/messages/${gigId}/${userId}`,{
-    auth: true
-  }),
-  getconversation: () => apiRequest("messages/conversations",{auth: true}),
 };
 
 async function apiRequest(path, { method = "GET", body = null, auth = false } = {}) {
-  const headers = { "Content-Type": "application/json" };
+  // FormData (file uploads) must NOT be JSON-encoded, and the browser has to
+  // set the multipart Content-Type (with its boundary) itself.
+  const isForm = body instanceof FormData;
+  const headers = isForm ? {} : { "Content-Type": "application/json" };
   if (auth) {
     const token = Auth.getToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -53,7 +47,7 @@ async function apiRequest(path, { method = "GET", body = null, auth = false } = 
     response = await fetch(`${API_BASE}${path.replace(/^\/+/, "")}`, {
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: body ? (isForm ? body : JSON.stringify(body)) : undefined,
     });
   } catch (networkErr) {
     throw new Error(
@@ -66,6 +60,15 @@ async function apiRequest(path, { method = "GET", body = null, auth = false } = 
     data = await response.json();
   } catch (_e) {
     // no JSON body
+  }
+
+  // A 401 on a logged-in request means the token expired or was revoked.
+  if (response.status === 401 && auth) {
+    Auth.clearToken();
+    if (!window.location.pathname.endsWith("login.html")) {
+      window.location.href = "login.html";
+    }
+    throw new Error("Your session expired. Please log in again.");
   }
 
   if (!response.ok) {
@@ -92,9 +95,12 @@ const Api = {
 
   dashboard: () => apiRequest("/dashboard", { auth: true }),
 
-  sendMessage:(payload)=>apiRequest("messages",{method: "POST", body: payload, auth: true}),
-  getMessages: (gigId, userId)=> apiRequest(`/messages/${gigId}/${userId}`,
-    {auth: true}),
+  // ---- Messaging ----
+  getConversations: () => apiRequest("/messages/conversations", { auth: true }),
+  getMessages: (gigId, userId) => apiRequest(`/messages/${gigId}/${userId}`, { auth: true }),
+  sendMessage: (payload) => apiRequest("/messages", { method: "POST", body: payload, auth: true }),
+  sendMessageWithAttachment: (formData) =>
+    apiRequest("/messages", { method: "POST", body: formData, auth: true }),
 };
 
 /* ---------- Toast helper (shared UI feedback) ---------- */
@@ -126,3 +132,13 @@ function timeAgo(isoString) {
   if (days < 30) return `${days}d ago`;
   return new Date(isoString + "Z").toLocaleDateString();
 }
+
+/* ---------- Keep tabs in sync ----------
+   The login lives in localStorage, which every tab of this site shares.
+   If another tab logs in/out (e.g. you test as client in one tab and as
+   freelancer in another), reload so this tab never acts as the wrong user. */
+window.addEventListener("storage", (event) => {
+  if (event.key === "nf_token" || event.key === "nf_user") {
+    window.location.reload();
+  }
+});

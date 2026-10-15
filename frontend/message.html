@@ -1,35 +1,365 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Messages | Nexus Forge</title>
 
     <link rel="stylesheet" href="css/style.css">
 
-    
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .messages-page {
+            display: flex;
+            width: min(1200px, 96%);
+            height: min(760px, calc(100vh - 120px));
+            min-height: 420px;
+            margin: 35px auto;
+            overflow: hidden;
+            border: 1px solid #e2e5e9;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+        }
+
+        .conversation-panel {
+            width: 340px;
+            flex-shrink: 0;
+            border-right: 1px solid #e2e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .conversation-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e5e9;
+        }
+
+        .conversation-header h2 {
+            margin: 0;
+        }
+
+        #conversationList {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .conversation {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f1f3;
+            transition: background 0.15s ease;
+        }
+
+        .conversation:hover {
+            background: #f6f8fa;
+        }
+
+        .conversation.active {
+            background: #edf4ff;
+        }
+
+        .avatar {
+            width: 43px;
+            height: 43px;
+            min-width: 43px;
+            border-radius: 50%;
+            background: #e9efff;
+            color: #244caa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .conversation-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .conversation-name {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .last-message {
+            color: #6b7280;
+            font-size: 0.86rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .conversation-gig {
+            color: #858b96;
+            font-size: 0.76rem;
+            margin-top: 4px;
+        }
+
+        .chat-panel {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            min-height: 78px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e2e5e9;
+        }
+
+        .chat-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-user strong {
+            display: block;
+        }
+
+        .chat-subtitle {
+            font-size: 0.8rem;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #fafbfc;
+        }
+
+        .message {
+            width: fit-content;
+            max-width: min(75%, 480px);
+            padding: 11px 14px;
+            border-radius: 12px;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+            line-height: 1.45;
+            background: #fff;
+            border: 1px solid #e3e6eb;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            background: #e9f1ff;
+            border-color: #d4e3ff;
+        }
+
+        .message.received {
+            align-self: flex-start;
+        }
+
+        .message-time {
+            display: block;
+            font-size: 0.7rem;
+            color: #7b8190;
+            text-align: right;
+            margin-top: 6px;
+        }
+
+        .attachment-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 9px 11px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            color: inherit;
+            text-decoration: none;
+            overflow-wrap: anywhere;
+        }
+
+        .attachment-link:hover {
+            text-decoration: underline;
+        }
+
+        .message-input-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px;
+            border-top: 1px solid #e2e5e9;
+            background: #fff;
+        }
+
+        .message-input {
+            min-width: 0;
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #d7dce2;
+            border-radius: 9px;
+            outline: none;
+            font: inherit;
+        }
+
+        .message-input:focus {
+            border-color: #527de8;
+        }
+
+        .send-button,
+        .attach-button {
+            border: 0;
+            border-radius: 9px;
+            min-height: 42px;
+            padding: 0 14px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .send-button {
+            background: #285bd4;
+            color: white;
+        }
+
+        .attach-button {
+            background: #edf0f5;
+            color: #202a39;
+        }
+
+        .send-button:disabled,
+        .attach-button:disabled,
+        .message-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            padding: 24px;
+            color: #737985;
+            text-align: center;
+        }
+
+        .attachment-status {
+            padding: 0 14px 10px;
+            color: #5e6674;
+            font-size: 0.85rem;
+            background: white;
+        }
+
+        #attachmentInput {
+            display: none;
+        }
+
+        @media (max-width: 700px) {
+            .messages-page {
+                width: 100%;
+                height: calc(100vh - 90px);
+                min-height: 350px;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .conversation-panel {
+                width: 110px;
+            }
+
+            .conversation-header {
+                padding: 12px 6px;
+                text-align: center;
+            }
+
+            .conversation-header h2 {
+                font-size: 1rem;
+            }
+
+            .conversation {
+                flex-direction: column;
+                align-items: center;
+                padding: 12px 5px;
+                gap: 7px;
+            }
+
+            .conversation-info {
+                width: 100%;
+                text-align: center;
+            }
+
+            .conversation-name,
+            .last-message,
+            .conversation-gig {
+                font-size: 0.72rem;
+            }
+
+            .chat-header {
+                padding: 12px;
+            }
+
+            #messages {
+                padding: 12px;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            .message-input-area {
+                gap: 5px;
+                padding: 8px;
+            }
+
+            .message-input {
+                padding: 10px 7px;
+            }
+
+            .attach-button,
+            .send-button {
+                padding: 0 10px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
+    <div id="nav-root"></div>
+
     <div class="messages-page">
 
-        <!-- Conversation List -->
+        <!-- Conversation list -->
+
         <aside class="conversation-panel">
 
             <div class="conversation-header">
                 <h2>Messages</h2>
+                <div class="chat-subtitle" id="whoami"></div>
             </div>
-                
-            <div id="conversationList">
 
+            <div id="conversationList">
+                <div class="empty-state">
+                    Loading conversations...
+                </div>
             </div>
 
         </aside>
 
 
-        <!-- Chat -->
+        <!-- Active chat -->
+
         <main class="chat-panel">
 
             <header class="chat-header">
@@ -37,38 +367,87 @@
                 <div class="chat-user">
 
                     <div class="avatar" id="chatAvatar">
-                        D
+                        ?
                     </div>
 
                     <div>
                         <strong id="chatName">
-                            David
+                            Select a conversation
                         </strong>
 
-                        <div class="online">
-                            ● Online
+                        <div
+                            class="chat-subtitle"
+                            id="chatGig"
+                        >
+                            Your accepted gig conversations
                         </div>
                     </div>
 
                 </div>
 
             </header>
-            
-            <!-- Input -->
-            <form class="message-input-area"
-                  id="messageForm">
+
+
+            <!-- Message history -->
+
+            <div
+                id="messages"
+                aria-live="polite"
+            >
+                <div class="empty-state">
+                    Select a conversation to start messaging.
+                </div>
+            </div>
+
+
+            <!-- Attachment preview/status -->
+
+            <div
+                id="attachmentStatus"
+                class="attachment-status"
+                hidden
+            ></div>
+
+
+            <!-- Message input -->
+
+            <form
+                class="message-input-area"
+                id="messageForm"
+            >
+
+                <input
+                    type="file"
+                    id="attachmentInput"
+                    accept=".jpg,.jpeg,.png,.gif,.webp,.pdf"
+                >
+
+                <button
+                    type="button"
+                    id="attachButton"
+                    class="attach-button"
+                    title="Attach an image or PDF"
+                    disabled
+                >
+                    📎
+                </button>
 
                 <input
                     type="text"
                     id="messageInput"
                     class="message-input"
-                    placeholder="Type a message..."
+                    placeholder="Select a conversation first"
                     autocomplete="off"
+                    maxlength="5000"
+                    disabled
                 >
 
                 <button
                     type="submit"
-                    class="send-button">
+                    id="sendButton"
+                    class="send-button"
+                    disabled
+                >
                     ➤
                 </button>
 
@@ -78,164 +457,831 @@
 
     </div>
 
-<script src="js/api.js"></script>
-<script src="js/nav.js"></script>
-<script>
+
+    <script src="js/api.js?v=2"></script>
+    <script src="js/nav.js?v=2"></script>
+
+    <script>
+        // --------------------------------------------------
+        // STATE
+        // --------------------------------------------------
+
+        const currentUser = Auth.getUser();
+
+        let conversations = [];
+
+        let activeConversation = null;
+
+        let selectedAttachment = null;
+
+        let refreshing = false;
+
+        let lastSignature = "";
 
 
-const messageForm = document.getElementById("messageForm");
-const messageInput = document.getElementById("messageInput");
-const messages = document.getElementById("messages");
+        const conversationList =
+            document.getElementById("conversationList");
 
-const currentUser = Auth.getUser();
-let conversation = [];
-let activeconversation = null;
+        const messagesElement =
+            document.getElementById("messages");
 
+        const messageForm =
+            document.getElementById("messageForm");
 
+        const messageInput =
+            document.getElementById("messageInput");
 
+        const sendButton =
+            document.getElementById("sendButton");
 
-// Load messages
-async function loadMessages(conversation) {
+        const attachButton =
+            document.getElementById("attachButton");
 
-  try{
-    const data = await Api.getMessages(
-        Number(conversation.gig_id),
-        Number(conversation.other_user_id)
-    );
-    messages.innerHTML = "";
-    data.messages.forEach(message =>{
-        const div = document.createElement("div");
-        div.className = Number(message.sender_id)=== Number(currentUser.id) ? "message sent": "message Received";
-        div.innerHTML = `${escapeHtml(message.content)}
-                    <span class="message-time">${new Date(message.created_at + "Z").toLocaleTimeString([], {
-                        hour:"2-digit",
-                        minute:"2-digit"
-                    })}</span>`;
-                    messages.appendChild(div);
-                    
-    });
-    messages.scrollTop = messages.scrollHeight;
-  }catch (error){
-    console.error(
-        "could not load messages",
-        error
-    );
-    showToast(
-        error.message,
-        "error"
-    );
-  }
-}
+        const attachmentInput =
+            document.getElementById("attachmentInput");
+
+        const attachmentStatus =
+            document.getElementById("attachmentStatus");
 
 
+        // --------------------------------------------------
+        // AUTHENTICATION
+        // --------------------------------------------------
 
+        if (!Auth.isLoggedIn() || !currentUser) {
 
-async function loadconversations() {
-    try{
-        const data = await Api.getconversation();
-        conversation = data.conversation || [];
-        conversationList.innerHTML = "";
-        if(!conversation.length){
-            conversationList.innerHTML =`<div class="muted" style="padding: 20px;">No message yet</div>`;
-            return;
+            window.location.href = "login.html";
+
+        } else {
+
+            renderNav("messages");
+
+            document.getElementById("whoami").textContent =
+                "Signed in as " + currentUser.name + " (" + currentUser.role + ")";
+
         }
-        conversation.forEach((conversation, index) => {
+
+
+        // --------------------------------------------------
+        // SAFE HTML
+        // --------------------------------------------------
+
+        function escapeText(value) {
+
             const div = document.createElement("div");
-            div.className = "conversation";
-            div.innerHTML = `<div class="avatar">${escapeHtml(conversation.other_user_name.charAt(0).toUpperCase())}</div>
-                            <div> class="conversation-info">
-                                <div class="conversation-name">${escapeHtml(conversation.other_user_name)}</div>
-                                <div class="last-message">${escapeHtml(conversation.last_message)}</div>
-                                <div class="muted" style="font-size: 0.75rem;">${escapeHtml(conversation.gig_title)}</div>
-                             </div>
-                             `;
-                             div.addEventListener("click", () => {
-                                openconversation(index);
-                             });
-                             conversationList.appendChild(div);   
+
+            div.textContent = value ?? "";
+
+            return div.innerHTML;
+        }
+
+
+        // --------------------------------------------------
+        // MESSAGE TIME
+        // --------------------------------------------------
+
+        function formatMessageTime(value) {
+
+            if (!value) return "";
+
+            // Server times are UTC. Older rows have no timezone marker, and
+            // JS would read those as LOCAL time, so mark them as UTC first.
+            let text = String(value);
+
+            if (!/(Z|[+-]\d{2}:?\d{2})$/.test(text)) {
+                text = text.replace(" ", "T") + "Z";
+            }
+
+            const date = new Date(text);
+
+            if (Number.isNaN(date.getTime())) {
+                return "";
+            }
+
+            return date.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        }
+
+
+        // --------------------------------------------------
+        // INPUT STATE
+        // --------------------------------------------------
+
+        function setChatEnabled(enabled) {
+
+            messageInput.disabled = !enabled;
+            sendButton.disabled = !enabled;
+            attachButton.disabled = !enabled;
+
+            messageInput.placeholder = enabled
+                ? "Type a message..."
+                : "Select a conversation first";
+        }
+
+
+        // --------------------------------------------------
+        // LOAD CONVERSATIONS
+        // --------------------------------------------------
+
+        async function loadConversations() {
+
+            try {
+
+                const data = await Api.getConversations();
+
+                conversations =
+                    data.conversations ||
+                    data.conversation ||
+                    [];
+
+                conversationList.innerHTML = "";
+
+                if (!conversations.length) {
+
+                    conversationList.innerHTML = `
+                        <div class="empty-state">
+                            No conversations yet.
+                            <br><br>
+                            A conversation appears here once an
+                            application on a gig has been accepted.
+                        </div>
+                    `;
+
+                    activeConversation = null;
+
+                    messagesElement.innerHTML = `
+                        <div class="empty-state">
+                            No conversations available.
+                        </div>
+                    `;
+
+                    setChatEnabled(false);
+
+                    return;
+                }
+
+                conversations.forEach((item, index) => {
+
+                    const button = document.createElement("div");
+
+                    button.className = "conversation";
+
+                    if (
+                        activeConversation &&
+                        Number(activeConversation.gig_id) ===
+                            Number(item.gig_id) &&
+                        Number(activeConversation.other_user_id) ===
+                            Number(item.other_user_id)
+                    ) {
+                        button.classList.add("active");
+                    }
+
+                    const avatar = document.createElement("div");
+
+                    avatar.className = "avatar";
+
+                    avatar.textContent =
+                        (item.other_user_name || "?")
+                        .charAt(0)
+                        .toUpperCase();
+
+                    const info = document.createElement("div");
+
+                    info.className = "conversation-info";
+
+                    const name = document.createElement("div");
+
+                    name.className = "conversation-name";
+
+                    name.textContent =
+                        item.other_user_name || "User";
+
+                    const lastMessage = document.createElement("div");
+
+                    lastMessage.className = "last-message";
+
+                    lastMessage.textContent =
+                        item.last_message || "Attachment";
+
+                    const gigTitle = document.createElement("div");
+
+                    gigTitle.className = "conversation-gig";
+
+                    gigTitle.textContent =
+                        item.gig_title || "Gig conversation";
+
+                    info.append(
+                        name,
+                        lastMessage,
+                        gigTitle
+                    );
+
+                    button.append(avatar, info);
+
+                    button.addEventListener("click", () => {
+                        openConversation(index);
+                    });
+
+                    conversationList.appendChild(button);
+
+                });
+
+            } catch (error) {
+
+                console.error(
+                    "Could not load conversations:",
+                    error
+                );
+
+                conversationList.innerHTML = `
+                    <div class="empty-state">
+                        Could not load conversations.
+                        <br><br>
+                        ${escapeText(error.message)}
+                    </div>
+                `;
+
+            }
+        }
+
+
+        // --------------------------------------------------
+        // OPEN CONVERSATION
+        // --------------------------------------------------
+
+        async function openConversation(index) {
+
+            const selected = conversations[index];
+
+            if (!selected) return;
+
+            activeConversation = selected;
+
+            document.getElementById("chatAvatar").textContent =
+                (selected.other_user_name || "?")
+                .charAt(0)
+                .toUpperCase();
+
+            document.getElementById("chatName").textContent =
+                selected.other_user_name || "User";
+
+            document.getElementById("chatGig").textContent =
+                selected.gig_title || "Gig conversation";
+
+            setChatEnabled(true);
+
+            lastSignature = "";
+
+            await loadConversationsWithoutReset();
+
+            await loadMessages(activeConversation);
+
+            messageInput.focus();
+
+        }
+
+
+        // --------------------------------------------------
+        // REFRESH CONVERSATION LIST WITHOUT REBUILDING IT
+        // --------------------------------------------------
+
+        async function loadConversationsWithoutReset() {
+
+            document.querySelectorAll(".conversation")
+                .forEach((element, index) => {
+
+                    element.classList.toggle(
+                        "active",
+                        conversations[index] === activeConversation
+                    );
+
+                });
+
+        }
+
+
+        // --------------------------------------------------
+        // LOAD MESSAGE HISTORY
+        // --------------------------------------------------
+
+        async function loadMessages(
+            selectedConversation,
+            silent = false
+        ) {
+
+            if (!selectedConversation) return;
+
+            try {
+
+                const data = await Api.getMessages(
+                    Number(selectedConversation.gig_id),
+                    Number(selectedConversation.other_user_id)
+                );
+
+                if (
+                    !activeConversation ||
+                    Number(activeConversation.gig_id) !==
+                        Number(selectedConversation.gig_id) ||
+                    Number(activeConversation.other_user_id) !==
+                        Number(selectedConversation.other_user_id)
+                ) {
+                    return;
+                }
+
+                const incoming = data.messages || [];
+
+                const signature = [
+                    selectedConversation.gig_id,
+                    selectedConversation.other_user_id,
+                    incoming.length,
+                    incoming.length ? incoming[incoming.length - 1].id : 0
+                ].join(":");
+
+                if (silent && signature === lastSignature) return;
+
+                lastSignature = signature;
+
+                const previousScroll =
+                    messagesElement.scrollTop;
+
+                const wasNearBottom =
+                    messagesElement.scrollHeight -
+                    messagesElement.scrollTop -
+                    messagesElement.clientHeight < 100;
+
+                messagesElement.innerHTML = "";
+
+                const messageRows = data.messages || [];
+
+                if (!messageRows.length) {
+
+                    messagesElement.innerHTML = `
+                        <div class="empty-state">
+                            Start the conversation.
+                        </div>
+                    `;
+
+                }
+
+                messageRows.forEach(message => {
+
+                    const bubble = document.createElement("div");
+
+                    bubble.className =
+                        Number(message.sender_id) ===
+                        Number(currentUser.id)
+                            ? "message sent"
+                            : "message received";
+
+                    if (message.content) {
+
+                        const content = document.createElement("div");
+
+                        content.textContent = message.content;
+
+                        bubble.appendChild(content);
+
+                    }
+
+                    if (message.attachment) {
+
+                        const attachment =
+                            document.createElement("a");
+
+                        attachment.className = "attachment-link";
+
+                        attachment.textContent =
+                            "📎 " +
+                            message.attachment.name +
+                            " — Open/download";
+
+                        // API_BASE already ends in /api/, and the server's
+                        // url starts with /api/ too, so strip it once.
+                        attachment.href =
+                            `${API_BASE}${message.attachment.url.replace(/^\/?api\//, "")}`;
+
+                        attachment.target = "_blank";
+
+                        attachment.rel = "noopener noreferrer";
+
+                        // Attachment routes require the bearer token.
+                        // Fetch the protected file with authentication
+                        // and open a temporary local browser URL.
+                        attachment.addEventListener(
+                            "click",
+                            async event => {
+
+                                event.preventDefault();
+
+                                try {
+
+                                    const response = await fetch(
+                                        attachment.href,
+                                        {
+                                            headers: {
+                                                Authorization:
+                                                    `Bearer ${Auth.getToken()}`
+                                            }
+                                        }
+                                    );
+
+                                    if (!response.ok) {
+
+                                        let result = {};
+
+                                        try {
+                                            result = await response.json();
+                                        } catch (_error) {}
+
+                                        throw new Error(
+                                            result.error ||
+                                            "Could not download attachment"
+                                        );
+
+                                    }
+
+                                    const blob = await response.blob();
+
+                                    const blobUrl =
+                                        URL.createObjectURL(blob);
+
+                                    const downloadLink =
+                                        document.createElement("a");
+
+                                    downloadLink.href = blobUrl;
+
+                                    downloadLink.download =
+                                        message.attachment.name;
+
+                                    document.body.appendChild(
+                                        downloadLink
+                                    );
+
+                                    downloadLink.click();
+
+                                    downloadLink.remove();
+
+                                    setTimeout(
+                                        () => URL.revokeObjectURL(blobUrl),
+                                        60000
+                                    );
+
+                                } catch (error) {
+
+                                    showToast(
+                                        error.message,
+                                        "error"
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                        bubble.appendChild(attachment);
+
+                    }
+
+                    const time = document.createElement("span");
+
+                    time.className = "message-time";
+
+                    time.textContent =
+                        formatMessageTime(message.created_at);
+
+                    bubble.appendChild(time);
+
+                    messagesElement.appendChild(bubble);
+
+                });
+
+                if (wasNearBottom || !silent) {
+
+                    messagesElement.scrollTop =
+                        messagesElement.scrollHeight;
+
+                } else {
+
+                    messagesElement.scrollTop = previousScroll;
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "Could not load messages:",
+                    error
+                );
+
+                if (!silent) {
+
+                    showToast(
+                        error.message,
+                        "error"
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        // --------------------------------------------------
+        // ATTACHMENT PICKER
+        // --------------------------------------------------
+
+        attachButton.addEventListener("click", () => {
+
+            if (!activeConversation) return;
+
+            attachmentInput.click();
+
         });
-   
-    }catch(error){
-        console.error(
-            "could not load conversation",
-            error
+
+
+        attachmentInput.addEventListener("change", () => {
+
+            selectedAttachment =
+                attachmentInput.files[0] || null;
+
+            if (selectedAttachment) {
+
+                const allowedTypes = [
+                    "image/jpeg",
+                    "image/png",
+                    "image/gif",
+                    "image/webp",
+                    "application/pdf"
+                ];
+
+                if (
+                    !allowedTypes.includes(
+                        selectedAttachment.type
+                    )
+                ) {
+
+                    showToast(
+                        "Choose a JPG, PNG, GIF, WEBP or PDF file.",
+                        "error"
+                    );
+
+                    attachmentInput.value = "";
+
+                    selectedAttachment = null;
+
+                    attachmentStatus.hidden = true;
+
+                    return;
+                }
+
+                if (
+                    selectedAttachment.size >
+                    10 * 1024 * 1024
+                ) {
+
+                    showToast(
+                        "Files cannot exceed 10 MB.",
+                        "error"
+                    );
+
+                    attachmentInput.value = "";
+
+                    selectedAttachment = null;
+
+                    attachmentStatus.hidden = true;
+
+                    return;
+                }
+
+                attachmentStatus.textContent =
+                    "Selected: " + selectedAttachment.name;
+
+                attachmentStatus.hidden = false;
+
+            } else {
+
+                attachmentStatus.hidden = true;
+
+            }
+
+        });
+
+
+        // --------------------------------------------------
+        // SEND MESSAGE
+        // --------------------------------------------------
+
+        messageForm.addEventListener(
+            "submit",
+            async event => {
+
+                event.preventDefault();
+
+                if (!activeConversation) {
+
+                    showToast(
+                        "Select a conversation first.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                const text = messageInput.value.trim();
+
+                if (!text && !selectedAttachment) return;
+
+                const sendButtonText = sendButton.textContent;
+
+                sendButton.disabled = true;
+
+                attachButton.disabled = true;
+
+                try {
+
+                    if (selectedAttachment) {
+
+                        const formData = new FormData();
+
+                        formData.append(
+                            "gig_id",
+                            Number(activeConversation.gig_id)
+                        );
+
+                        formData.append(
+                            "receiver_id",
+                            Number(activeConversation.other_user_id)
+                        );
+
+                        formData.append(
+                            "content",
+                            text
+                        );
+
+                        formData.append(
+                            "attachment",
+                            selectedAttachment
+                        );
+
+                        await Api.sendMessageWithAttachment(
+                            formData
+                        );
+
+                    } else {
+
+                        await Api.sendMessage({
+
+                            gig_id:
+                                Number(activeConversation.gig_id),
+
+                            receiver_id:
+                                Number(activeConversation.other_user_id),
+
+                            content: text
+
+                        });
+
+                    }
+
+                    messageInput.value = "";
+
+                    attachmentInput.value = "";
+
+                    selectedAttachment = null;
+
+                    attachmentStatus.hidden = true;
+
+                    await loadMessages(activeConversation);
+
+                    await loadConversations();
+
+                } catch (error) {
+
+                    console.error(
+                        "Could not send message:",
+                        error
+                    );
+
+                    showToast(
+                        error.message,
+                        "error"
+                    );
+
+                } finally {
+
+                    sendButton.textContent = sendButtonText;
+
+                    setChatEnabled(!!activeConversation);
+
+                }
+
+            }
         );
-        
-    };
-    showToast(
-        error.message,
-        "error"
-    )
-    
-}
-
-//open conversation 
-async function loadconversation (index) {
-    
-    const conversation =openconversation[index];
-    if(!conversation)return;
-    activeconversation = conversation;
-    document.getElementById("chatAvatar").textContent = conversation.other_user_name.charAt(0).toUpperCase();
-    document.getElementById("chatname").textContent = conversation.other_user_name;
-    messageInput.disabled = false;
-    messageForm.querySelector("button").disabled = false;
-    messageInput.placeholder = "type your message....";
-    await loadMessages(conversations);
-}
 
 
-// Send message
-messageForm.addEventListener("submit", async function(event) {
+        // --------------------------------------------------
+        // AUTOMATIC REFRESH
+        // --------------------------------------------------
 
-    event.preventDefault();
+        async function refreshChat() {
 
-    const text = messageInput.value.trim();
-    
-    if (!text) return;
+            if (refreshing) return;
 
-   
-    try {
+            if (document.hidden) return;
 
-        await Api.sendMessage({
+            refreshing = true;
 
-            gig_id: Number(activeconversation.gig_id),
+            try {
 
-            receiver_id: Number(activeconversation.other_user_id),
+                await loadConversations();
 
-            content: text
+                if (activeConversation) {
 
-        });
+                    // Use the latest conversation record if it
+                    // still exists in the refreshed list.
+                    const updatedConversation =
+                        conversations.find(item =>
+                            Number(item.gig_id) ===
+                                Number(activeConversation.gig_id) &&
+                            Number(item.other_user_id) ===
+                                Number(activeConversation.other_user_id)
+                        );
 
-        messageInput.value = "";
+                    if (updatedConversation) {
 
-        await loadMessages(activeconversation);
-        await loadconversations();
+                        activeConversation = updatedConversation;
 
-    } catch (error) {
+                        await loadMessages(
+                            activeConversation,
+                            true
+                        );
 
-        showToast(error.message, "error");
+                    }
 
-    }
+                }
 
-});
+            } finally {
 
+                refreshing = false;
 
-// Escape HTML
-function escapeHtml(text) {
+            }
 
-    const div = document.createElement("div");
-
-    div.textContent = text;
-
-    return div.innerHTML;
-
-}
+        }
 
 
-// Load messages when page opens
-loadconversations();
+        // --------------------------------------------------
+        // DEEP LINK  (message.html?gig_id=1&user_id=2)
+        // --------------------------------------------------
 
-</script>
+        function openFromQuery() {
+
+            const params = new URLSearchParams(window.location.search);
+
+            const gigId = Number(params.get("gig_id"));
+            const otherId = Number(params.get("user_id"));
+
+            if (!gigId || !otherId) return;
+
+            const index = conversations.findIndex(item =>
+                Number(item.gig_id) === gigId &&
+                Number(item.other_user_id) === otherId
+            );
+
+            if (index >= 0) {
+
+                openConversation(index);
+
+            } else {
+
+                showToast(
+                    "That conversation isn't available yet.",
+                    "error"
+                );
+
+            }
+        }
+
+
+        // --------------------------------------------------
+        // START PAGE
+        // --------------------------------------------------
+
+        if (Auth.isLoggedIn() && currentUser) {
+
+            setChatEnabled(false);
+
+            loadConversations().then(openFromQuery);
+
+            // Refresh every 5 seconds while the page is visible.
+            setInterval(refreshChat, 5000);
+
+        }
+
+    </script>
 
 </body>
 </html>
+

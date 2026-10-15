@@ -31,8 +31,8 @@ function renderNav(activePage = "") {
           ${
             loggedIn
               ? `<span class="muted" style="font-size:0.85rem;">Hi, ${escapeHtml(user.name.split(" ")[0])}</span>
-              <a href ="message.html" class="nav-message-icon" title ="Messages" arial-label="Open messages" style="display: inline-fles;align-items: center; justify-content:center;width:38px;height:38px;border-radius:50%;color:inherit;text-decoration:none;">
-              <svg xmins="http://www.w3.org/2000/svg" width="21" height="21" viewBox = "0 0 24 24" fill ="none" stroke="CurrentColor" stroke-width ="1.8" stroke-linecap ="round" stroke-linejoin ="round">
+              <a href ="message.html" class="nav-message-icon" title ="Messages" aria-label="Open messages" style="display: inline-flex;align-items: center; justify-content:center;width:38px;height:38px;border-radius:50%;color:inherit;text-decoration:none;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox = "0 0 24 24" fill ="none" stroke="CurrentColor" stroke-width ="1.8" stroke-linecap ="round" stroke-linejoin ="round">
               <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8
                           8.5 8.5 0 0 1-7.6 4.7
                           8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7

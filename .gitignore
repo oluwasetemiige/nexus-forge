@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Nexus Forge: user data and uploads must never be committed
+backend/private_message_uploads/
+backend/*.db
