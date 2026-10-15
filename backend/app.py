@@ -69,6 +69,7 @@ def create_app() -> Flask:
 # Entrypoint
 # ---------------------------------------------------------------------------
 app = create_app()
+init_db()
 print(app.url_map)
 
 if __name__ == "__main__":
