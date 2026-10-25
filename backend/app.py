@@ -34,22 +34,40 @@ from routes.message_route import message_bp
 def create_app() -> Flask:
     app = Flask(__name__)
 
-    # ── CORS (no external library needed) ───────────────────────────────────
-    allowed_origins = {"http://localhost:8000", "http://127.0.0.1:8000"}
+      # ── CORS (no external library needed) ───────────────────────────────────
 
-def is_allowed_origin(origin):
-   if not origin:
+    allowed_origins = {
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    }
+
+    def is_allowed_origin(origin):
+        if not origin:
             return False
-        return(origin in allowed_origins or(origin.startswitch("https://")and origin.endswitch("vercel.app")))
-  
-      @app.after_request
+
+        return (
+            origin in allowed_origins
+            or (
+                origin.startswith("https://")
+                and origin.endswith(".vercel.app")
+            )
+        )
+
+    @app.after_request
     def add_cors_headers(response):
         origin = request.headers.get("Origin")
-        if origin in allowed_origins:
+
+        if is_allowed_origin(origin):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Vary"] = "Origin"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+
+        response.headers["Access-Control-Allow-Headers"] = (
+            "Content-Type, Authorization"
+        )
+        response.headers["Access-Control-Allow-Methods"] = (
+            "GET, POST, PUT, DELETE, OPTIONS"
+        )
+
         return response
 
     @app.route("/api/<path:_any>", methods=["OPTIONS"])
