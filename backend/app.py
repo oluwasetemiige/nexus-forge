@@ -37,6 +37,11 @@ def create_app() -> Flask:
     # ── CORS (no external library needed) ───────────────────────────────────
     allowed_origins = {"http://localhost:8000", "http://127.0.0.1:8000"}
 
+   def is_allowed_origin(origin):
+        if not origin:
+            return False
+        return(origin in allowed_origins or(origin.startswitch("https://")and origin.endswitch("vercel.app")))
+
     @app.after_request
     def add_cors_headers(response):
         origin = request.headers.get("Origin")
